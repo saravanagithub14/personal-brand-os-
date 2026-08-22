@@ -1,0 +1,1843 @@
+PROJECT: Personal Brand OS
+TYPE: Django-based AI-powered personal brand management platform
+
+You are a senior full-stack engineer, Django architect, AI engineer, product designer, and DevOps engineer.
+
+Build a production-quality web application called:
+
+"Personal Brand OS"
+
+The application is a single dashboard for managing my entire personal brand across multiple social media platforms.
+
+The system must combine:
+
+1. Social media content calendar
+2. AI content preparation
+3. AI script generation
+4. AI content repurposing
+5. News and research scraper
+6. Personal brand knowledge base
+7. Content idea management
+8. Content approval workflow
+9. Publishing/scheduling architecture
+10. Content analytics
+11. Project and portfolio management
+12. Personal brand dashboard
+13. AI agents for different content tasks
+
+The application must be modular and designed so additional social platforms, AI providers, scrapers, and agents can be added later.
+
+==================================================
+PHASE 0: PRODUCT PRINCIPLES
+==================================================
+
+Do NOT build a simple CRUD dashboard.
+
+Build an actual personal brand operating system.
+
+The application should answer:
+
+"What should I post?"
+
+"Why should I post it?"
+
+"Where should I post it?"
+
+"When should I post it?"
+
+"How should I present it?"
+
+"Can this idea be repurposed?"
+
+"What news is relevant to my niche?"
+
+"What content is performing?"
+
+"What should I create next?"
+
+The AI should assist me, but I must remain in control.
+
+Every AI-generated item should be editable before publication.
+
+Never automatically publish AI-generated content without an explicit approval state.
+
+==================================================
+PHASE 1: TECH STACK
+==================================================
+
+Backend:
+
+- Python
+- Django
+- Django REST Framework
+- PostgreSQL
+- Celery
+- Redis
+- django-environ
+- Gunicorn
+
+Frontend:
+
+Prefer Django templates for MVP.
+
+Use:
+- HTML
+- CSS
+- JavaScript
+- Bootstrap or Tailwind CSS
+
+Keep the frontend architecture modular so React/Next.js can replace the UI later if needed.
+
+Authentication:
+
+- Django authentication
+- Login
+- Logout
+- Password reset
+- User profile
+
+Environment:
+
+Use .env for:
+
+SECRET_KEY
+DEBUG
+DATABASE_URL
+REDIS_URL
+OPENAI_API_KEY
+ANTHROPIC_API_KEY
+GROQ_API_KEY
+GOOGLE_API_KEY
+NEWS_API_KEY
+YOUTUBE_API_KEY
+SOCIAL_PLATFORM_KEYS
+
+Never hardcode API keys.
+
+==================================================
+PHASE 2: CORE APPLICATION ARCHITECTURE
+==================================================
+
+Create separate Django apps:
+
+accounts/
+dashboard/
+brand/
+content/
+calendar/
+ai_agents/
+research/
+news/
+social/
+analytics/
+projects/
+media/
+notifications/
+
+Keep responsibilities separated.
+
+Suggested structure:
+
+personal_brand_os/
+    manage.py
+
+    config/
+        settings/
+        urls.py
+        celery.py
+        asgi.py
+        wsgi.py
+
+    apps/
+        accounts/
+        dashboard/
+        brand/
+        content/
+        calendar/
+        ai_agents/
+        research/
+        news/
+        social/
+        analytics/
+        projects/
+        media/
+        notifications/
+
+    templates/
+    static/
+    media/
+
+Use service layers instead of putting business logic directly inside views.
+
+==================================================
+PHASE 3: PERSONAL BRAND PROFILE
+==================================================
+
+Create a Brand Profile system.
+
+Fields:
+
+- name
+- professional_title
+- short_bio
+- long_bio
+- positioning_statement
+- niche
+- target_audience
+- expertise
+- skills
+- tone_of_voice
+- writing_style
+- languages
+- content_goals
+- career_story
+- achievements
+- education
+- experience
+- projects
+- workshops
+- publications
+- social_profiles
+- portfolio_url
+- github_url
+- linkedin_url
+- instagram_url
+- youtube_url
+- twitter_url
+- threads_url
+- reddit_url
+
+Allow editing from dashboard.
+
+Create:
+
+Brand Voice Profile
+
+with:
+
+- tone
+- sentence length
+- vocabulary preferences
+- words to avoid
+- phrases to avoid
+- preferred hooks
+- CTA style
+- technical depth
+- audience level
+
+AI agents must use this profile when generating content.
+
+==================================================
+PHASE 4: PERSONAL BRAND KNOWLEDGE BASE
+==================================================
+
+Create a knowledge base.
+
+Users can add:
+
+- portfolio pages
+- projects
+- GitHub repositories
+- articles
+- research papers
+- workshop material
+- presentations
+- PDFs
+- notes
+- URLs
+- previous social posts
+
+Store:
+
+- title
+- source
+- content
+- tags
+- category
+- created_at
+- updated_at
+
+Create semantic search capability.
+
+Architecture should support embeddings and vector search.
+
+For MVP:
+
+Use PostgreSQL + pgvector if available.
+
+Design a Knowledge Retrieval Service:
+
+KnowledgeRetriever
+
+Functions:
+
+search()
+retrieve_context()
+get_project_context()
+get_brand_context()
+get_content_history()
+
+AI agents should retrieve relevant personal information before generating content.
+
+This prevents the AI from inventing personal achievements.
+
+==================================================
+PHASE 5: CONTENT DATABASE
+==================================================
+
+Create ContentItem model.
+
+Fields:
+
+id
+title
+idea
+content_type
+platform
+pillar
+status
+priority
+scheduled_at
+published_at
+created_at
+updated_at
+
+Content types:
+
+- Reel
+- Carousel
+- LinkedIn Post
+- X Post
+- X Thread
+- YouTube Video
+- YouTube Short
+- Blog
+- Newsletter
+- Reddit Post
+- Story
+- Facebook Post
+- Threads Post
+
+Statuses:
+
+IDEA
+RESEARCHING
+DRAFT
+AI_GENERATED
+EDITING
+APPROVED
+SCHEDULED
+PUBLISHED
+ARCHIVED
+
+Each content item can have:
+
+- hook
+- body
+- CTA
+- hashtags
+- keywords
+- references
+- source URLs
+- script
+- caption
+- visual instructions
+- thumbnail idea
+
+==================================================
+PHASE 6: CONTENT PILLARS
+==================================================
+
+Create configurable content pillars.
+
+Default pillars:
+
+1. Cells to Code
+2. AI Engineering
+3. Generative AI
+4. Agentic AI
+5. AI for Biology
+6. AI Research
+7. Teaching AI
+8. Career in AI
+9. Projects
+10. Build in Public
+11. AI News
+12. Personal Story
+
+Admin can create/edit/delete pillars.
+
+Each pillar should have:
+
+- description
+- target audience
+- preferred platforms
+- content formats
+- percentage allocation
+
+Example:
+
+Cells to Code:
+20%
+
+AI Engineering:
+25%
+
+AI Education:
+20%
+
+AI + Biology:
+15%
+
+Projects:
+10%
+
+AI News:
+10%
+
+==================================================
+PHASE 7: CONTENT CALENDAR
+==================================================
+
+Build a powerful calendar.
+
+Views:
+
+- Month
+- Week
+- Day
+- Content pipeline
+- Platform view
+- Content pillar view
+
+Calendar cards should display:
+
+Platform
+Content type
+Title
+Pillar
+Status
+Scheduled time
+
+Allow:
+
+Drag and drop
+Reschedule
+Duplicate
+Convert to another platform
+Move to another date
+Open editor
+
+Filters:
+
+Platform
+Pillar
+Status
+Content type
+
+Add:
+
+"Generate week's content"
+
+button.
+
+The AI should analyze:
+
+- previous posts
+- content pillars
+- upcoming dates
+- current trends
+- news
+- content gaps
+
+Then propose a weekly content calendar.
+
+==================================================
+PHASE 8: AI CONTENT STRATEGIST AGENT
+==================================================
+
+Create:
+
+ContentStrategistAgent
+
+Responsibilities:
+
+- analyze brand
+- analyze audience
+- analyze previous content
+- identify content gaps
+- generate content ideas
+- recommend platforms
+- recommend formats
+- recommend posting frequency
+- create weekly content calendar
+- create monthly content calendar
+
+Input:
+
+Brand profile
+Content history
+Analytics
+News
+Trends
+Projects
+Content pillars
+
+Output:
+
+Structured content plan.
+
+Each recommendation must include:
+
+topic
+reason
+platform
+format
+hook
+pillar
+target audience
+priority
+suggested date
+
+==================================================
+PHASE 9: AI CONTENT WRITER AGENT
+==================================================
+
+Create:
+
+ContentWriterAgent
+
+It should generate:
+
+Instagram captions
+LinkedIn posts
+X posts
+X threads
+Facebook posts
+Threads posts
+YouTube descriptions
+Blog drafts
+Newsletter drafts
+Reddit posts
+
+The agent must respect:
+
+brand voice
+platform constraints
+target audience
+content pillar
+technical depth
+
+Never generate generic motivational content unless explicitly requested.
+
+==================================================
+PHASE 10: SCRIPT PREPARATION AGENT
+==================================================
+
+Create:
+
+ScriptWriterAgent
+
+Inputs:
+
+Topic
+Platform
+Video length
+Audience
+Tone
+Goal
+
+Generate:
+
+- Hook
+- Pattern interrupt
+- Introduction
+- Main explanation
+- Example
+- CTA
+
+For short-form video:
+
+Generate timestamps.
+
+Example:
+
+0-3 sec:
+Hook
+
+3-10 sec:
+Problem
+
+10-30 sec:
+Explanation
+
+30-45 sec:
+Example
+
+45-60 sec:
+CTA
+
+Also generate:
+
+On-screen text
+B-roll suggestions
+Visual suggestions
+Camera directions
+Caption
+Title
+Thumbnail concept
+
+Allow:
+
+30 sec
+45 sec
+60 sec
+90 sec
+3 min
+5 min
+10 min
+
+==================================================
+PHASE 11: CONTENT REPURPOSING AGENT
+==================================================
+
+Create:
+
+RepurposingAgent
+
+Input:
+
+One master piece of content.
+
+Generate platform-specific versions.
+
+Example:
+
+YouTube video
+    ↓
+YouTube Short
+    ↓
+Instagram Reel
+    ↓
+LinkedIn post
+    ↓
+X thread
+    ↓
+Threads post
+    ↓
+Facebook post
+    ↓
+Reddit discussion
+    ↓
+Carousel
+
+Do NOT simply copy the same content.
+
+Each version must be adapted to the platform.
+
+==================================================
+PHASE 12: AI CONTENT REVIEW AGENT
+==================================================
+
+Create:
+
+ContentReviewerAgent
+
+Before approval, evaluate:
+
+- clarity
+- hook strength
+- factual accuracy
+- usefulness
+- originality
+- brand alignment
+- platform fit
+- CTA quality
+- hallucination risk
+
+Return:
+
+score: 0-100
+
+and:
+
+strengths
+weaknesses
+suggested improvements
+factual claims requiring verification
+
+Never automatically mark content as approved.
+
+==================================================
+PHASE 13: NEWS SCRAPER
+==================================================
+
+Create a research/news aggregation system.
+
+Sources should be configurable.
+
+Potential sources:
+
+- Google News
+- RSS feeds
+- Hacker News
+- Reddit
+- arXiv
+- Hugging Face
+- OpenAI official blog
+- Anthropic official announcements
+- Google AI
+- Meta AI
+- Microsoft AI
+- NVIDIA
+- GitHub trending
+- major AI publications
+
+Do NOT scrape websites aggressively.
+
+Respect robots.txt, rate limits, terms of service, and APIs/RSS where available.
+
+Create:
+
+NewsSource
+
+fields:
+
+name
+url
+source_type
+rss_url
+category
+active
+
+Create:
+
+NewsArticle
+
+fields:
+
+title
+url
+source
+summary
+published_at
+discovered_at
+category
+tags
+relevance_score
+processed
+content_hash
+
+Prevent duplicate articles.
+
+==================================================
+PHASE 14: NEWS ANALYSIS AGENT
+==================================================
+
+Create:
+
+NewsResearchAgent
+
+For every article:
+
+1. Extract title
+2. Extract source
+3. Generate summary
+4. Identify topic
+5. Identify AI technology
+6. Identify why it matters
+7. Identify possible content angles
+8. Score relevance to my personal brand
+
+Example:
+
+AI news
+
+↓
+
+"Open-source model released"
+
+↓
+
+Why it matters
+
+↓
+
+Possible content:
+
+Instagram Reel
+LinkedIn analysis
+X thread
+YouTube explanation
+
+Store these suggestions.
+
+==================================================
+PHASE 15: DAILY AI NEWS BRIEF
+==================================================
+
+Create dashboard section:
+
+"Today's AI Brief"
+
+Show:
+
+Top 5 news items
+Why each matters
+Brand relevance
+Possible content angle
+
+Button:
+
+"Turn into content"
+
+Clicking it should open the content generation workflow.
+
+==================================================
+PHASE 16: TREND DISCOVERY
+==================================================
+
+Create Trend model.
+
+Track:
+
+topic
+keyword
+platform
+source
+velocity
+relevance
+detected_at
+
+Create a trend scoring system.
+
+Score:
+
+0-100
+
+based on:
+
+recency
+engagement signals
+brand relevance
+content saturation
+
+Do not claim exact social media engagement metrics unless APIs provide them.
+
+==================================================
+PHASE 17: SOCIAL MEDIA PLATFORM ARCHITECTURE
+==================================================
+
+Create a generic SocialPlatform interface.
+
+Platforms:
+
+Instagram
+Facebook
+LinkedIn
+YouTube
+X
+Threads
+Reddit
+
+Do not tightly couple the application to one provider.
+
+Architecture:
+
+SocialPlatformAdapter
+
+Methods:
+
+authenticate()
+get_profile()
+create_post()
+upload_media()
+schedule_post()
+publish_post()
+get_posts()
+get_metrics()
+
+Each platform gets its own adapter.
+
+Example:
+
+LinkedInAdapter
+InstagramAdapter
+YouTubeAdapter
+XAdapter
+
+If API credentials are unavailable:
+
+Implement mock adapters.
+
+The UI must clearly indicate:
+
+"Connected"
+"Not connected"
+"Mock mode"
+
+Never fake successful publishing.
+
+==================================================
+PHASE 18: CONTENT APPROVAL WORKFLOW
+==================================================
+
+Workflow:
+
+IDEA
+↓
+RESEARCH
+↓
+AI DRAFT
+↓
+HUMAN EDIT
+↓
+AI REVIEW
+↓
+APPROVED
+↓
+SCHEDULED
+↓
+PUBLISHED
+↓
+ANALYZED
+
+Create approval history.
+
+Track:
+
+who approved
+when
+what changed
+AI version
+content version
+
+==================================================
+PHASE 19: MEDIA LIBRARY
+==================================================
+
+Create MediaAsset model.
+
+Support:
+
+images
+videos
+audio
+PDFs
+documents
+
+Fields:
+
+filename
+file
+type
+size
+tags
+project
+content_item
+created_at
+
+Build media browser.
+
+Allow content editor to attach media.
+
+==================================================
+PHASE 20: PROJECT PORTFOLIO
+==================================================
+
+Create Project model.
+
+Fields:
+
+title
+description
+problem
+solution
+technologies
+github_url
+demo_url
+images
+category
+date
+status
+
+Projects should become content sources.
+
+Add button:
+
+"Create content from this project"
+
+AI should generate:
+
+- project story
+- LinkedIn case study
+- Instagram reel
+- X thread
+- YouTube video idea
+- carousel outline
+
+==================================================
+PHASE 21: PERSONAL BRAND DASHBOARD
+==================================================
+
+Dashboard should be the main screen.
+
+Layout:
+
+TOP:
+
+Personal brand summary
+
+Followers
+Posts this month
+Scheduled posts
+Drafts
+Content ideas
+Engagement
+
+SECOND SECTION:
+
+Today's Tasks
+
+- 2 posts awaiting review
+- 1 script to complete
+- 5 news articles to review
+- 3 scheduled posts
+
+THIRD:
+
+Content Calendar
+
+FOURTH:
+
+AI News Brief
+
+FIFTH:
+
+Content Pipeline
+
+IDEA → DRAFT → REVIEW → APPROVED → SCHEDULED → PUBLISHED
+
+SIXTH:
+
+Analytics
+
+SEVENTH:
+
+Recommended Content
+
+==================================================
+PHASE 22: ANALYTICS
+==================================================
+
+Create analytics architecture.
+
+Metrics:
+
+followers
+views
+likes
+comments
+shares
+saves
+clicks
+engagement rate
+watch time
+reach
+
+Track by:
+
+platform
+content
+pillar
+format
+date
+
+Dashboard charts:
+
+Growth
+Engagement
+Top content
+Best platform
+Best pillar
+Best format
+
+Allow date filters.
+
+==================================================
+PHASE 23: AI CONTENT ANALYTICS AGENT
+==================================================
+
+Create:
+
+AnalyticsAgent
+
+Responsibilities:
+
+Analyze performance.
+
+Identify:
+
+best topics
+best hooks
+best formats
+best platforms
+weak content
+posting patterns
+content gaps
+
+Generate recommendations such as:
+
+"Project walkthroughs outperform generic AI tips."
+
+"Your technical posts receive more saves than motivational posts."
+
+Recommendations must be based on stored data.
+
+Do not invent analytics.
+
+==================================================
+PHASE 24: CONTENT IDEA GENERATOR
+==================================================
+
+Create an AI idea generator.
+
+Button:
+
+"Generate 20 Ideas"
+
+Generate ideas based on:
+
+Brand
+Projects
+News
+Trends
+Audience
+Previous content
+Content pillars
+
+Every idea should include:
+
+title
+hook
+platform
+format
+pillar
+reason
+difficulty
+potential
+
+==================================================
+PHASE 25: CONTENT EDITOR
+==================================================
+
+Build a rich content editor.
+
+Left:
+
+Content editor
+
+Right:
+
+AI assistant
+
+AI actions:
+
+Improve hook
+Rewrite
+Shorten
+Expand
+Make technical
+Make beginner friendly
+Generate CTA
+Generate hashtags
+Fact check
+Create thread
+Create reel
+Create carousel
+Repurpose
+
+Allow users to select text and ask AI to transform it.
+
+==================================================
+PHASE 26: AI AGENT ORCHESTRATION
+==================================================
+
+Create an AgentManager.
+
+Agents:
+
+ContentStrategistAgent
+ContentIdeaAgent
+ResearchAgent
+NewsResearchAgent
+ContentWriterAgent
+ScriptWriterAgent
+RepurposingAgent
+ReviewerAgent
+AnalyticsAgent
+
+Agent workflow:
+
+User request
+↓
+AgentManager
+↓
+Select agent
+↓
+Retrieve brand context
+↓
+Retrieve relevant knowledge
+↓
+Execute
+↓
+Validate
+↓
+Store output
+↓
+Show human for approval
+
+Use structured JSON responses internally.
+
+==================================================
+PHASE 27: AI PROVIDER ABSTRACTION
+==================================================
+
+Do NOT hardcode the application to OpenAI.
+
+Create:
+
+AIProvider interface.
+
+Providers:
+
+OpenAI
+Anthropic
+Google
+Groq
+Ollama
+
+Methods:
+
+generate_text()
+generate_structured()
+embed()
+summarize()
+
+Allow selecting provider/model from settings.
+
+Example:
+
+AI_PROVIDER=openai
+AI_MODEL=gpt-5-mini
+
+Support local Ollama models for development.
+
+==================================================
+PHASE 28: PROMPT MANAGEMENT
+==================================================
+
+Create PromptTemplate model.
+
+Fields:
+
+name
+agent
+system_prompt
+user_prompt
+version
+active
+created_at
+
+Do not hardcode every prompt inside Python.
+
+Allow prompts to be edited from admin.
+
+Create prompt versioning.
+
+==================================================
+PHASE 29: AUTOMATION
+==================================================
+
+Use Celery + Redis.
+
+Scheduled jobs:
+
+Every morning:
+
+fetch news
+
+Every 6 hours:
+
+process new articles
+
+Every evening:
+
+generate content recommendations
+
+Weekly:
+
+generate content calendar
+
+Daily:
+
+check scheduled posts
+
+Daily:
+
+update analytics
+
+Allow admin to enable/disable jobs.
+
+==================================================
+PHASE 30: NOTIFICATIONS
+==================================================
+
+Notifications for:
+
+new relevant news
+content awaiting approval
+upcoming scheduled post
+failed publishing
+weekly analytics report
+AI recommendations
+
+Start with in-app notifications.
+
+Design for email notifications later.
+
+==================================================
+PHASE 31: SEARCH
+==================================================
+
+Global search.
+
+Search across:
+
+content
+projects
+news
+research
+scripts
+ideas
+media
+knowledge base
+
+Use PostgreSQL full-text search initially.
+
+Architecture should support vector search.
+
+==================================================
+PHASE 32: SECURITY
+==================================================
+
+Implement:
+
+CSRF
+secure authentication
+permission checks
+environment variables
+file validation
+upload size limits
+rate limiting where appropriate
+safe HTML rendering
+API authentication
+secure session settings
+
+Never expose API keys.
+
+Social access tokens must be encrypted or securely stored.
+
+==================================================
+PHASE 33: ADMIN PANEL
+==================================================
+
+Customize Django admin.
+
+Admin sections:
+
+Brand
+Content
+Calendar
+AI Agents
+Prompts
+News
+Research
+Projects
+Social platforms
+Analytics
+Media
+Notifications
+
+Make admin usable.
+
+==================================================
+PHASE 34: UI/UX
+==================================================
+
+Design should feel like a modern SaaS dashboard.
+
+Dark/light mode.
+
+Sidebar:
+
+Dashboard
+Calendar
+Content
+Ideas
+AI Studio
+Scripts
+Research
+AI News
+Projects
+Social Accounts
+Analytics
+Media
+Brand
+Settings
+
+Top bar:
+
+Global Search
+Notifications
+AI Assistant
+Profile
+
+Use cards, charts, badges, tabs and clean spacing.
+
+Responsive design.
+
+Desktop-first but mobile friendly.
+
+==================================================
+PHASE 35: MVP PRIORITY
+==================================================
+
+Do NOT attempt everything at once.
+
+Build in this order.
+
+MVP 1:
+
+Authentication
+Brand Profile
+Content database
+Content calendar
+Content editor
+Content pillars
+Projects
+Basic AI generation
+Dashboard
+
+MVP 2:
+
+AI agents
+Script generation
+Repurposing
+Knowledge base
+News scraper
+AI news analysis
+
+MVP 3:
+
+Social platform connections
+Scheduling
+Publishing
+Analytics
+
+MVP 4:
+
+Advanced automation
+Vector search
+Advanced analytics
+Agent orchestration
+Trend detection
+Notifications
+
+==================================================
+PHASE 36: SEED DATA
+==================================================
+
+Create realistic seed data based on this personal brand concept:
+
+Name:
+Saravana Perumal R.
+
+Positioning:
+
+Biologist turned Data Scientist and Generative AI Engineer.
+
+Core story:
+
+"From Cells to Code"
+
+Background:
+
+Biology research
+Data Science
+Generative AI
+Teaching
+AI engineering
+
+Content themes:
+
+Generative AI
+LLMs
+RAG
+Agentic AI
+Multimodal AI
+AI engineering
+AI education
+AI + Biology
+AI research
+Career transition
+Projects
+Build in public
+
+Create sample projects such as:
+
+RAG chatbot
+Agentic AI search engine
+YOLO construction safety detection
+CNN brain tumor classification
+Multimodal AI workflows
+
+Do not present fictional achievements as real achievements.
+
+Clearly mark seed data as demo data.
+
+==================================================
+PHASE 37: TESTING
+==================================================
+
+Create tests for:
+
+Models
+Views
+APIs
+AI services
+Agent workflows
+News ingestion
+Duplicate detection
+Calendar
+Permissions
+Social adapters
+Content workflow
+
+Use pytest or Django TestCase.
+
+At minimum:
+
+80% coverage for core business logic.
+
+==================================================
+PHASE 38: API
+==================================================
+
+Create REST API endpoints.
+
+Examples:
+
+/api/brand/
+/api/content/
+/api/content/generate/
+/api/content/repurpose/
+/api/scripts/
+/api/calendar/
+/api/news/
+/api/research/
+/api/projects/
+/api/social/
+/api/analytics/
+/api/agents/
+
+Use serializers and permissions properly.
+
+==================================================
+PHASE 39: DOCUMENTATION
+==================================================
+
+Generate:
+
+README.md
+ARCHITECTURE.md
+API.md
+AI_AGENTS.md
+DATABASE.md
+DEPLOYMENT.md
+ENVIRONMENT.md
+
+README must contain:
+
+project overview
+features
+architecture
+installation
+environment setup
+database setup
+Redis setup
+Celery setup
+development commands
+testing
+deployment
+
+==================================================
+PHASE 40: DOCKER
+==================================================
+
+Create:
+
+Dockerfile
+docker-compose.yml
+docker-compose.dev.yml
+
+Services:
+
+web
+db
+redis
+worker
+beat
+
+Make the application runnable with:
+
+docker compose up
+
+==================================================
+PHASE 41: DEPLOYMENT
+==================================================
+
+Prepare production deployment.
+
+Target:
+
+AWS EC2 initially.
+
+Architecture:
+
+Internet
+↓
+Caddy/Nginx
+↓
+Gunicorn
+↓
+Django
+↓
+PostgreSQL
+Redis
+Celery Worker
+Celery Beat
+
+Use environment variables.
+
+Prepare for:
+
+AWS RDS
+S3
+CloudFront
+managed Redis
+
+later.
+
+==================================================
+PHASE 42: GIT WORKFLOW
+==================================================
+
+Create clean Git repository.
+
+.gitignore
+
+Do not commit:
+
+.env
+database files
+media files
+API keys
+credentials
+virtual environments
+
+Create logical commits.
+
+==================================================
+IMPORTANT DEVELOPMENT RULES
+==================================================
+
+1. Do not build everything in one giant file.
+
+2. Follow Django conventions.
+
+3. Use reusable services.
+
+4. Use type hints where useful.
+
+5. Add docstrings to complex services.
+
+6. Avoid duplicated code.
+
+7. Do not fake API integrations.
+
+8. If a social API is unavailable, implement a clean mock adapter.
+
+9. Never fabricate analytics.
+
+10. Never fabricate personal achievements.
+
+11. AI-generated content must always be editable.
+
+12. Human approval is required before publishing.
+
+13. Keep AI provider abstraction separate from business logic.
+
+14. Keep social platform integrations separate from content logic.
+
+15. Keep scraping separate from AI processing.
+
+16. Keep analytics separate from publishing.
+
+17. Use database transactions where appropriate.
+
+18. Add logging for background jobs.
+
+19. Handle failed Celery jobs gracefully.
+
+20. Make the system easy to extend.
+
+==================================================
+DEVELOPMENT EXECUTION
+==================================================
+
+Start by inspecting the current repository.
+
+Do not immediately generate the entire application.
+
+First:
+
+1. Inspect existing files.
+2. Identify whether Django already exists.
+3. Create an architecture document.
+4. Create the project structure.
+5. Set up Django.
+6. Configure PostgreSQL.
+7. Configure Redis.
+8. Configure Celery.
+9. Implement authentication.
+10. Implement Brand Profile.
+11. Implement Content models.
+12. Implement Content Calendar.
+13. Implement Dashboard.
+14. Implement basic AI service.
+15. Run migrations.
+16. Create seed data.
+17. Write tests.
+18. Run the application.
+
+After MVP works, continue phase by phase.
+
+At every phase:
+
+- run tests
+- fix errors
+- verify migrations
+- verify UI
+- verify API
+- update documentation
+
+Do not move to the next major phase if the current phase is broken.
+
+==================================================
+FINAL PRODUCT GOAL
+==================================================
+
+The finished application should allow me to open one dashboard every morning and see:
+
+------------------------------------------
+PERSONAL BRAND OS
+------------------------------------------
+
+Good morning, Saravana.
+
+TODAY
+
+3 posts scheduled
+2 drafts awaiting review
+7 relevant AI news articles
+5 new content ideas
+1 script to finish
+
+------------------------------------------
+
+CONTENT CALENDAR
+
+Mon | LinkedIn | RAG lesson
+Tue | Instagram | AI Reel
+Wed | YouTube | Agentic AI
+Thu | X | AI News Thread
+Fri | LinkedIn | Project Case Study
+
+------------------------------------------
+
+AI NEWS
+
+1. Important AI release
+2. New research paper
+3. New open-source model
+4. AI industry update
+5. Interesting AI application
+
+[Turn into Content]
+
+------------------------------------------
+
+AI RECOMMENDATIONS
+
+"Your RAG content is performing well."
+
+"Consider creating a deeper tutorial this week."
+
+[Generate Content]
+
+------------------------------------------
+
+CONTENT PIPELINE
+
+Ideas → Research → Draft → Review → Approved → Scheduled → Published
+
+------------------------------------------
+
+ANALYTICS
+
+Top Platform
+Top Content
+Top Topic
+Growth
+Engagement
+
+------------------------------------------
+
+AI STUDIO
+
+[Generate Idea]
+
+[Write Post]
+
+[Create Script]
+
+[Repurpose]
+
+[Analyze News]
+
+[Improve Content]
+
+[Build Calendar]
+
+------------------------------------------
+
+The application should feel like the control center for my entire personal brand.
+
+Build it incrementally.
+
+Start with the MVP.
+
+Do not skip architecture, tests, documentation, or database design.
+
+Do not claim a feature is complete until it has been implemented and tested.

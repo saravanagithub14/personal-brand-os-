@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{% if item %}Edit {{ item.title }}{% else %}New Content{% endif %} | Personal Brand OS{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h2>{% if item %}✍️ Edit Content{% else %}✨ Create New Content{% endif %}</h2>
+            <p style="color: var(--text-muted);">Craft your post, hook, script, and visual framing.</p>
+        </div>
+        <div>
+            <a href="{% url 'content:list' %}" class="btn" style="background: var(--bg-hover);">Cancel</a>
+            <button type="submit" class="btn">Save & Snapshot Version</button>
+        </div>
+    </div>
+
+    <div class="grid-3">
+        <!-- Main Content Form -->
+        <div class="card" style="grid-column: span 2;">
+            <div class="form-group">
+                <label>Title / Identifier</label>
+                <input type="text" name="title" class="form-control" value="{{ item.title|default:'' }}" required placeholder="e.g. How we scaled Django Celery to 10k tasks/sec">
+            </div>
+
+            <div class="form-group">
+                <label>🪝 Hook (First line / Attention grabber)</label>
+                <textarea name="hook" class="form-control" rows="2" placeholder="Stop building CRUD apps in 2026. Here is why...">{{ item.hook|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>📄 Body / Main Article / Thread Content</label>
+                <textarea name="body" class="form-control" rows="10" placeholder="Write main content body here...">{{ item.body|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>🎯 Call To Action (CTA)</label>
+                <input type="text" name="cta" class="form-control" value="{{ item.cta|default:'' }}" placeholder="e.g. Drop a comment below or star our repo on GitHub!">
+            </div>
+
+            <div class="form-group">
+                <label>🎬 Script (For Videos/Reels/Shorts)</label>
+                <textarea name="script" class="form-control" rows="4" placeholder="[00:00] Intro visual... [00:15] Core lesson...">{{ item.script|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Sidebar Options -->
+        <div class="card">
+            <h3>⚙️ Meta & Status</h3>
+            <div style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label>Platform Target</label>
+                    <select name="platform" class="form-control">
+                        <option value="LINKEDIN" {% if item.platform == "LINKEDIN" %}selected{% endif %}>LinkedIn Post</option>
+                        <option value="X" {% if item.platform == "X" %}selected{% endif %}>X (Twitter) Post</option>
+                        <option value="X_THREAD" {% if item.platform == "X_THREAD" %}selected{% endif %}>X Thread</option>
+                        <option value="YOUTUBE" {% if item.platform == "YOUTUBE" %}selected{% endif %}>YouTube Video</option>
+                        <option value="INSTAGRAM_REEL" {% if item.platform == "INSTAGRAM_REEL" %}selected{% endif %}>Instagram Reel</option>
+                        <option value="CAROUSEL" {% if item.platform == "CAROUSEL" %}selected{% endif %}>Carousel</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" class="form-control">
+                        <option value="DRAFT" {% if item.status == "DRAFT" %}selected{% endif %}>Draft</option>
+                        <option value="EDITING" {% if item.status == "EDITING" %}selected{% endif %}>Editing</option>
+                        <option value="APPROVED" {% if item.status == "APPROVED" %}selected{% endif %}>Approved</option>
+                        <option value="SCHEDULED" {% if item.status == "SCHEDULED" %}selected{% endif %}>Scheduled</option>
+                        <option value="PUBLISHED" {% if item.status == "PUBLISHED" %}selected{% endif %}>Published</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Content Pillar</label>
+                    <select name="pillar" class="form-control">
+                        <option value="">-- Select Pillar --</option>
+                        {% for p in pillars %}
+                        <option value="{{ p.id }}" {% if item.pillar_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Hashtags</label>
+                    <input type="text" name="hashtags" class="form-control" value="{{ item.hashtags|default:'' }}" placeholder="#AI #SoftwareEngineering">
+                </div>
+
+                <div class="form-group">
+                    <label>Change Log Note</label>
+                    <input type="text" name="change_reason" class="form-control" placeholder="e.g. Updated hook and CTA">
+                </div>
+            </div>
+
+            {% if item and item.versions.all %}
+            <div style="margin-top: 1.5rem;">
+                <h4>📜 Version History ({{ item.versions.count }})</h4>
+                <ul style="list-style: none; margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                    {% for v in item.versions.all %}
+                    <li style="margin-bottom: 0.4rem; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.3rem;">
+                        v{{ v.version_number }} - {{ v.change_reason }} ({{ v.created_at|date:"M d, H:i" }})
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</form>
+{% endblock %}

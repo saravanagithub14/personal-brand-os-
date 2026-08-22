@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Personal Brand OS{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="brand-title">⚡ Personal Brand OS</div>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+                <span>Logged in as <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'accounts:logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">Login</a>
+                <a href="{% url 'accounts:register' %}" class="btn">Register</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="app-container">
+        {% if user.is_authenticated %}
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="{% url 'dashboard:index' %}">📊 Dashboard</a></li>
+                <li><a href="{% url 'brand:profile' %}">👤 Brand Strategy</a></li>
+                <li><a href="{% url 'content:list' %}">📝 Content Bank</a></li>
+                <li><a href="{% url 'content:ideas' %}">💡 Ideas Bank</a></li>
+                <li><a href="{% url 'content:pillars' %}">🎯 Content Pillars</a></li>
+                <li><a href="{% url 'calendar:index' %}">📅 Calendar</a></li>
+                <li><a href="{% url 'projects:list' %}">🚀 Projects Hub</a></li>
+                <li><a href="#" style="opacity: 0.5;">🤖 AI Studio (Phase 3)</a></li>
+                <li><a href="#" style="opacity: 0.5;">🌐 Social (Phase 4)</a></li>
+            </ul>
+        </aside>
+        {% endif %}
+
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+</body>
+</html>

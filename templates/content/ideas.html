@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Ideas Bank | Personal Brand OS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>💡 Content Ideas Bank</h2>
+    <p style="color: var(--text-muted); margin-top: 0.5rem;">Quickly capture raw topics, hooks, and content sparks before they fade.</p>
+</div>
+
+<div class="grid-3">
+    <div class="card">
+        <h3>⚡ Capture New Idea</h3>
+        <form method="post" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Idea Title / Concept</label>
+                <input type="text" name="title" class="form-control" required placeholder="e.g. Why micro-frontends fail in small teams">
+            </div>
+            <div class="form-group">
+                <label>Notes / Inspiration</label>
+                <textarea name="idea" class="form-control" rows="4" placeholder="Brief outline or key take-aways..."></textarea>
+            </div>
+            <button type="submit" class="btn">Save Idea</button>
+        </form>
+    </div>
+
+    <div class="card" style="grid-column: span 2;">
+        <h3>📥 Saved Ideas ({{ ideas.count }})</h3>
+        <div style="margin-top: 1rem;">
+            {% if ideas %}
+                {% for idea in ideas %}
+                <div style="background: var(--bg-primary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong>{{ idea.title }}</strong>
+                        <a href="{% url 'content:editor_edit' idea.pk %}" class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">Develop into Draft</a>
+                    </div>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">{{ idea.idea|default:"No notes added." }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">No raw ideas currently in the bank. Capture one using the form!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

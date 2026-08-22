@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Personal Brand OS{% endblock %}
+
+{% block content %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h2>Welcome back, {{ profile.name|default:user.username }}! 👋</h2>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">
+            Niche: <strong>{{ profile.niche|default:"Set your niche in Brand Strategy" }}</strong> | 
+            Title: {{ profile.professional_title|default:"Personal Brand Operating System" }}
+        </p>
+    </div>
+    <a href="{% url 'content:editor_create' %}" class="btn">＋ Create Content</a>
+</div>
+
+<div class="grid-3" style="margin-bottom: 1.5rem;">
+    <div class="card">
+        <h3>💡 Ideas Bank</h3>
+        <p style="font-size: 2rem; font-weight: bold; color: var(--accent-blue); margin-top: 0.5rem;">{{ metrics.ideas_count }}</p>
+        <a href="{% url 'content:ideas' %}" style="font-size: 0.85rem;">View Ideas →</a>
+    </div>
+    <div class="card">
+        <h3>✍️ Drafts & Editing</h3>
+        <p style="font-size: 2rem; font-weight: bold; color: var(--accent-purple); margin-top: 0.5rem;">{{ metrics.drafts_count }}</p>
+        <a href="{% url 'content:list' %}?status=DRAFT" style="font-size: 0.85rem;">View Drafts →</a>
+    </div>
+    <div class="card">
+        <h3>📅 Scheduled / Approved</h3>
+        <p style="font-size: 2rem; font-weight: bold; color: var(--accent-green); margin-top: 0.5rem;">{{ metrics.scheduled_count }}</p>
+        <a href="{% url 'calendar:index' %}" style="font-size: 0.85rem;">View Calendar →</a>
+    </div>
+</div>
+
+<div class="grid-3">
+    <div class="card" style="grid-column: span 2;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>📝 Recent Content Activity</h3>
+            <a href="{% url 'content:list' %}">View All ({{ metrics.total_content }})</a>
+        </div>
+
+        {% if recent_items %}
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem;">
+                        <th style="padding: 0.5rem;">Title</th>
+                        <th>Platform</th>
+                        <th>Status</th>
+                        <th>Last Modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_items %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 0.75rem;">
+                            <a href="{% url 'content:editor_edit' item.pk %}"><strong>{{ item.title }}</strong></a>
+                        </td>
+                        <td>{{ item.get_platform_display }}</td>
+                        <td><span style="color: var(--accent-blue); font-weight: 500;">{{ item.get_status_display }}</span></td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">{{ item.updated_at|date:"M d, H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No content created yet. Start by creating an idea or draft!</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>🎯 Operating System Overview</h3>
+        <ul style="list-style: none; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                <span>Active Pillars:</span> <strong>{{ metrics.pillars_count }}</strong>
+            </li>
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                <span>Registered Projects:</span> <strong>{{ metrics.projects_count }}</strong>
+            </li>
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                <span>Published Items:</span> <strong>{{ metrics.published_count }}</strong>
+            </li>
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                <span>Brand Profile:</span> 
+                {% if profile.niche %}<span style="color: var(--accent-green);">Configured</span>{% else %}<span style="color: var(--accent-purple);">Pending</span>{% endif %}
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

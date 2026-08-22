@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Projects & Portfolio | Personal Brand OS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>🚀 Projects Hub</h2>
+    <p style="color: var(--text-muted); margin-top: 0.5rem;">
+        Catalog your real software projects, case studies, and engineering achievements. Turn any project into stories, LinkedIn posts, or video ideas with one click.
+    </p>
+</div>
+
+<div class="grid-3">
+    <div class="card">
+        <h3>➕ Add New Project</h3>
+        <form method="post" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Project Title</label>
+                <input type="text" name="title" class="form-control" required placeholder="e.g. Distributed Task Engine">
+            </div>
+            <div class="form-group">
+                <label>Short Description</label>
+                <textarea name="description" class="form-control" rows="2" placeholder="What does it do?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Problem Addressed</label>
+                <textarea name="problem" class="form-control" rows="2" placeholder="What challenge did you face?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Solution & Architecture</label>
+                <textarea name="solution" class="form-control" rows="2" placeholder="How did you build it?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Technologies Used</label>
+                <input type="text" name="technologies" class="form-control" placeholder="Python, Django, Celery, Redis, Docker">
+            </div>
+            <div class="form-group">
+                <label>GitHub Repository URL</label>
+                <input type="url" name="github_url" class="form-control" placeholder="https://github.com/...">
+            </div>
+            <button type="submit" class="btn">Save Project</button>
+        </form>
+    </div>
+
+    <div class="card" style="grid-column: span 2;">
+        <h3>📁 Registered Projects ({{ projects.count }})</h3>
+        <div style="margin-top: 1rem;">
+            {% if projects %}
+                {% for proj in projects %}
+                <div style="background: var(--bg-primary); padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 1.25rem; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h4 style="font-size: 1.1rem; color: var(--accent-blue);">{{ proj.title }}</h4>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Tech: {{ proj.technologies|default:"Not specified" }}</span>
+                        </div>
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="create_content">
+                            <input type="hidden" name="project_id" value="{{ proj.id }}">
+                            <select name="platform" style="padding: 0.3rem; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 0.25rem; font-size: 0.85rem;">
+                                <option value="LINKEDIN">LinkedIn Post</option>
+                                <option value="X_THREAD">X Thread</option>
+                                <option value="YOUTUBE">YouTube Video</option>
+                            </select>
+                            <button type="submit" class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">⚡ Generate Content Draft</button>
+                        </form>
+                    </div>
+                    <p style="color: var(--text-main); margin-top: 0.75rem; font-size: 0.95rem;">{{ proj.description }}</p>
+                    {% if proj.problem %}
+                    <div style="margin-top: 0.5rem; background: var(--bg-card); padding: 0.5rem; border-radius: 0.25rem; font-size: 0.85rem;">
+                        <strong>Challenge:</strong> {{ proj.problem }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: var(--text-muted);">No projects registered yet. Add a project to start creating content stories from your work!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

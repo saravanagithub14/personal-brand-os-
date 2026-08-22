@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Brand Profile & Voice | Personal Brand OS{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>👤 Brand Identity & Strategy</h2>
+    <p style="color: var(--text-muted); margin-top: 0.5rem;">
+        Define your positioning, niche, target audience, and writing voice. This grounds all AI agents and content strategy in your real expertise.
+    </p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="grid-3">
+        <!-- Brand Profile Card -->
+        <div class="card" style="grid-column: span 2;">
+            <h3>📌 Brand Profile</h3>
+            <div style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ profile.name }}" placeholder="e.g. Alex Rivera">
+                </div>
+                <div class="form-group">
+                    <label>Professional Title</label>
+                    <input type="text" name="professional_title" class="form-control" value="{{ profile.professional_title }}" placeholder="e.g. Senior AI Architect & Founder">
+                </div>
+                <div class="form-group">
+                    <label>Niche & Focus Area</label>
+                    <input type="text" name="niche" class="form-control" value="{{ profile.niche }}" placeholder="e.g. Generative AI, MLOps, Tech Entrepreneurship">
+                </div>
+                <div class="form-group">
+                    <label>Positioning Statement</label>
+                    <textarea name="positioning_statement" class="form-control" rows="3" placeholder="How you differentiate yourself in your market...">{{ profile.positioning_statement }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <textarea name="target_audience" class="form-control" rows="2" placeholder="Who you build for / write for...">{{ profile.target_audience }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Core Expertise & Skills</label>
+                    <textarea name="expertise" class="form-control" rows="2" placeholder="Key domains of strength...">{{ profile.expertise }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Portfolio / Website URL</label>
+                    <input type="url" name="portfolio_url" class="form-control" value="{{ profile.portfolio_url }}" placeholder="https://yourdomain.com">
+                </div>
+            </div>
+        </div>
+
+        <!-- Brand Voice Card -->
+        <div class="card">
+            <h3>🎙️ Brand Voice</h3>
+            <div style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label>Tone of Voice</label>
+                    <input type="text" name="tone" class="form-control" value="{{ voice.tone }}" placeholder="Authoritative, crisp, visionary">
+                </div>
+                <div class="form-group">
+                    <label>Sentence Structure</label>
+                    <input type="text" name="sentence_length" class="form-control" value="{{ voice.sentence_length }}" placeholder="Punchy, short paragraphs">
+                </div>
+                <div class="form-group">
+                    <label>CTA Style</label>
+                    <input type="text" name="cta_style" class="form-control" value="{{ voice.cta_style }}" placeholder="Direct, value-oriented">
+                </div>
+                <div class="form-group">
+                    <label>Words / Jargon to Avoid</label>
+                    <textarea name="words_to_avoid" class="form-control" rows="4" placeholder="Corporate buzzwords, empty hypes...">{{ voice.words_to_avoid }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn" style="margin-top: 1rem;">Save Brand Strategy</button>
+</form>
+{% endblock %}
