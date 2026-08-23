@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}{{ account.get_platform_display }} Detailed Analytics | Personal Brand OS{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <a href="{% url 'dashboard:index' %}" class="btn btn-secondary" style="font-size: 0.95rem; margin-bottom: 0.5rem; display: inline-block;">← Back to Dashboard</a>
+        <h2 style="color: var(--marker-blue); font-size: 2.2rem; display: flex; align-items: center; gap: 0.5rem;">
+            {% include "social/includes/platform_logo.html" with platform=account.platform %} {{ account.get_platform_display }}
+            <span style="color: var(--text-main); font-size: 1.8rem;">({{ account.handle }})</span>
+        </h2>
+        <p style="color: var(--text-muted);">Platform-specific metrics, historical growth snapshots, and consistency health analysis.</p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+        {% if account.platform == "LINKEDIN" %}
+        <a href="{% url 'social:linkedin_login' %}" class="btn btn-secondary" style="border: 1.5px solid #0077b5; color: #0077b5;">🔑 Connect LinkedIn Token</a>
+        {% endif %}
+        <form method="POST" action="{% url 'social:sync_account' account.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">🔄 Refresh Live Stats</button>
+        </form>
+        <a href="{% url 'content:editor_create' %}?platform={{ account.platform }}" class="btn">✍️ Draft {{ account.get_platform_display }} Post</a>
+    </div>
+</div>
+
+<!-- GitHub-Style Contribution & Posting Streak Matrix (POSITIONED AT TOP) -->
+<div class="card" style="margin-bottom: 1.5rem; border-top: 4px solid var(--accent-green);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+            <h3 style="color: var(--accent-green); margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                🟩 Posting Activity & Streak Matrix (Past 365 Days)
+            </h3>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <div style="background: var(--marker-blue-light); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Current Streak</span>
+                <p style="font-family: var(--marker-font); font-size: 1.3rem; font-weight: 700; color: var(--accent-green); margin: 0;">
+                    🔥 {{ current_streak }} Days
+                </p>
+            </div>
+            <div style="background: var(--marker-blue-light); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Longest Streak</span>
+                <p style="font-family: var(--marker-font); font-size: 1.3rem; font-weight: 700; color: var(--marker-blue); margin: 0;">
+                    ⚡ {{ longest_streak }} Days
+                </p>
+            </div>
+            <div style="background: var(--marker-blue-light); padding: 0.5rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">1-Year Posts</span>
+                <p style="font-family: var(--marker-font); font-size: 1.3rem; font-weight: 700; color: var(--accent-purple); margin: 0;">
+                    📊 {{ total_year_posts }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 52-Week Contribution Grid Container -->
+    <div style="overflow-x: auto; padding-bottom: 0.5rem;">
+        <div style="display: flex; gap: 3px; min-width: 720px; justify-content: space-between;">
+            {% for week in heatmap_weeks %}
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+                {% for day in week %}
+                <div title="{{ day.count }} post{% if day.count != 1 %}s{% endif %} on {{ day.formatted_date }}"
+                     style="width: 12px; height: 12px; border-radius: 2px; cursor: pointer; transition: transform 0.15s ease;
+                     {% if day.level == 0 %}background: var(--bg-main); border: 1px solid var(--border-color);
+                     {% elif day.level == 1 %}background: #0e4429; border: 1px solid #006d32;
+                     {% elif day.level == 2 %}background: #006d32; border: 1px solid #26a641;
+                     {% else %}background: #39d353; border: 1px solid #39d353; box-shadow: 0 0 5px rgba(57, 211, 83, 0.4);{% endif %}"
+                     onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform='scale(1)'">
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Heatmap Legend -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.85rem; font-size: 0.85rem; color: var(--text-muted);">
+        <span>364 Days Activity Breakdown</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span>Less</span>
+            <div style="width: 10px; height: 10px; border-radius: 2px; background: var(--bg-main); border: 1px solid var(--border-color);"></div>
+            <div style="width: 10px; height: 10px; border-radius: 2px; background: #0e4429; border: 1px solid #006d32;"></div>
+            <div style="width: 10px; height: 10px; border-radius: 2px; background: #006d32; border: 1px solid #26a641;"></div>
+            <div style="width: 10px; height: 10px; border-radius: 2px; background: #39d353; border: 1px solid #39d353;"></div>
+            <span>More</span>
+        </div>
+    </div>
+
+    <!-- Logged Post Dates List -->
+    {% if logged_post_dates %}
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1.5px dashed var(--border-color);">
+        <h4 style="color: var(--accent-green); margin-bottom: 0.75rem; font-size: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+            📅 Recorded Post Activity Log ({{ logged_post_dates|length }} active dates)
+        </h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; max-height: 140px; overflow-y: auto; padding-right: 0.5rem;">
+            {% for item in logged_post_dates %}
+            <div style="background: var(--marker-blue-light); border: 1px solid var(--border-color); padding: 0.4rem 0.75rem; border-radius: 8px; font-size: 0.85rem;">
+                <strong style="color: var(--marker-blue);">{{ item.formatted_date }}</strong>
+                <span class="badge" style="background: var(--accent-green); color: #fff; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.3rem;">
+                    {{ item.count }} post{% if item.count != 1 %}s{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 2x2 Metric Matrix & Cadence Banner -->
+<div class="grid-2" style="margin-bottom: 1.5rem;">
+    <!-- Metric Matrix Card -->
+    <div class="card" style="border-top: 4px solid var(--marker-blue-border);">
+        <h3 style="color: var(--marker-blue); margin-bottom: 1rem;">📊 Live Performance Matrix</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+            <div style="background: var(--marker-blue-light); padding: 1rem; border-radius: 12px; border: 1.5px solid var(--border-color);">
+                <span style="color: var(--text-muted); font-size: 0.95rem;">
+                    {% if account.platform == "LINKEDIN" %}Connections{% elif account.platform == "RESEARCHGATE" or account.platform == "ORCID" %}Academic Network{% else %}Followers{% endif %}
+                </span>
+                <p style="font-family: var(--marker-font); font-size: 2.2rem; font-weight: 700; color: var(--marker-blue); margin: 0.2rem 0;">
+                    {{ account.followers_count }}
+                </p>
+            </div>
+            <div style="background: var(--marker-blue-light); padding: 1rem; border-radius: 12px; border: 1.5px solid var(--border-color);">
+                <span style="color: var(--text-muted); font-size: 0.95rem;">
+                    {% if account.platform == "GITHUB" %}Public Repositories{% elif account.platform == "RESEARCHGATE" or account.platform == "ORCID" %}Works / Papers{% elif account.platform == "MEDIUM" %}Published Stories{% else %}Total Posts{% endif %}
+                </span>
+                <p style="font-family: var(--marker-font); font-size: 2.2rem; font-weight: 700; color: var(--accent-purple); margin: 0.2rem 0;">
+                    {{ account.posts_count }}
+                </p>
+            </div>
+            <div style="background: var(--marker-blue-light); padding: 1rem; border-radius: 12px; border: 1.5px solid var(--border-color);">
+                <span style="color: var(--text-muted); font-size: 0.95rem;">
+                    {% if account.platform == "RESEARCHGATE" or account.platform == "MEDIUM" or account.platform == "ORCID" %}Reads / Profile Views{% else %}Monthly Impressions{% endif %}
+                </span>
+                <p style="font-family: var(--marker-font); font-size: 2.2rem; font-weight: 700; color: var(--accent-green); margin: 0.2rem 0;">
+                    {{ account.total_impressions }}
+                </p>
+            </div>
+            <div style="background: var(--marker-blue-light); padding: 1rem; border-radius: 12px; border: 1.5px solid var(--border-color);">
+                <span style="color: var(--text-muted); font-size: 0.95rem;">
+                    {% if account.stars_count > 0 %}{% if account.platform == "MEDIUM" %}Total Claps{% else %}Stargazers{% endif %}{% elif account.citations_count > 0 %}Research Citations{% elif account.platform == "RESEARCHGATE" %}RG Score Index{% else %}Engagement Rate{% endif %}
+                </span>
+                <p style="font-family: var(--marker-font); font-size: 2.2rem; font-weight: 700; color: var(--marker-blue); margin: 0.2rem 0;">
+                    {% if account.stars_count > 0 %}⭐ {{ account.stars_count }}{% elif account.citations_count > 0 %}🔬 {{ account.citations_count }}{% elif account.platform == "RESEARCHGATE" %}{{ account.engagement_rate }} Score{% else %}{{ account.engagement_rate }}%{% endif %}
+                </p>
+            </div>
+        </div>
+        {% if account.profile_url %}
+        <div style="margin-top: 1rem; text-align: right;">
+            <a href="{{ account.profile_url }}" target="_blank" class="btn btn-secondary">🌐 Visit {{ account.get_platform_display }} Profile →</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Cadence Health & OAuth Connection Card -->
+    <div class="card" style="border-top: 4px solid var(--accent-purple);">
+        <h3 style="color: var(--accent-purple); margin-bottom: 1rem;">🔥 Posting Cadence & Connection Status</h3>
+        
+        {% if account.platform == "LINKEDIN" %}
+            {% if account.is_connected %}
+            <div style="background: #e6f4ea; border: 1px solid #ceedd5; color: #137333; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="font-size: 1.1rem;">✅ LinkedIn Connected (OAuth 2.0 Active)</strong>
+                    <p style="margin: 0.2rem 0 0 0; font-size: 0.9rem;">
+                        Member ID: <code>{{ account.provider_user_id|default:"urn:li:person:connected" }}</code> | Name: {{ account.handle }}
+                    </p>
+                </div>
+                <form method="POST" action="{% url 'social:linkedin_disconnect' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary" style="border-color: #c5221f; color: #c5221f; font-size: 0.88rem;">
+                        🔌 Disconnect LinkedIn
+                    </button>
+                </form>
+            </div>
+            {% elif account.requires_reauthorization %}
+            <div style="background: #fce8e6; border: 1px solid #fad2cf; color: #c5221f; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="font-size: 1.1rem;">⚠️ LinkedIn Connection Expired</strong>
+                    <p style="margin: 0.2rem 0 0 0; font-size: 0.9rem;">Your OAuth access token has expired. Please reconnect to publish content.</p>
+                </div>
+                <a href="{% url 'social:linkedin_login' %}" class="btn" style="background: #c5221f; font-size: 0.88rem;">
+                    🔄 Reconnect LinkedIn
+                </a>
+            </div>
+            {% else %}
+            <div style="background: var(--marker-blue-light); border: 1px solid var(--border-color); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="font-size: 1.1rem; color: var(--marker-blue);">💼 LinkedIn Not Connected via OAuth 2.0</strong>
+                    <p style="margin: 0.2rem 0 0 0; font-size: 0.9rem; color: var(--text-muted);">Authorize Personal Brand OS to publish content directly to LinkedIn.</p>
+                </div>
+                <a href="{% url 'social:linkedin_login' %}" class="btn" style="font-size: 0.88rem;">
+                    🚀 Connect LinkedIn
+                </a>
+            </div>
+            {% endif %}
+        {% endif %}
+        
+        <div style="background: {{ account.health_badge.bg }}; border: 1px solid {{ account.health_badge.border }}; padding: 1rem; border-radius: 12px; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: var(--marker-font); font-size: 1.4rem; font-weight: 700; color: {{ account.health_badge.color }};">
+                    {{ account.health_badge.emoji }} Consistency Status: {{ account.health_badge.label }}
+                </span>
+                <span style="font-size: 0.9rem; color: var(--text-muted);">
+                    Cadence Target: Every {{ account.target_cadence_days }} days
+                </span>
+            </div>
+            <p style="margin-top: 0.5rem; color: var(--text-main); font-size: 1.05rem;">
+                📅 <strong>Last Post Date:</strong> 
+                {% if account.days_since_last_post == 0 %}
+                    Today (On Track 🟢)
+                {% elif account.days_since_last_post == 1 %}
+                    Yesterday (On Track 🟢)
+                {% elif account.days_since_last_post < 999 %}
+                    {{ account.days_since_last_post }} days ago ({{ account.last_post_at|date:"M d, Y" }})
+                {% else %}
+                    No published posts logged yet.
+                {% endif %}
+            </p>
+        </div>
+
+        <form method="POST" action="{% url 'social:update_last_post' account.id %}" style="margin-top: 1rem; border-top: 1.5px dashed var(--border-color); padding-top: 1rem;">
+            {% csrf_token %}
+            <h4 style="color: var(--marker-blue); margin-bottom: 0.5rem;">✏️ Update Last Post Date & Brand Plan Target</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.88rem;">Last Post Date</label>
+                    <input type="date" name="last_post_date" class="form-control" value="{{ account.last_post_at|date:'Y-m-d' }}" required style="font-size: 0.95rem;">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.88rem;">Brand Plan Cadence (Days)</label>
+                    <input type="number" name="target_cadence_days" class="form-control" value="{{ account.target_cadence_days }}" required min="1" max="90" style="font-size: 0.95rem;">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-secondary" style="margin-top: 0.75rem; width: 100%; font-size: 0.95rem;">
+                💾 Save Post Date & Brand Plan
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Historical Snapshot Growth Table -->
+<div class="card">
+    <h3 style="color: var(--marker-blue); margin-bottom: 1rem;">📜 Historical Growth Log (Snapshots)</h3>
+    {% if snapshots %}
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
+                    <th style="padding: 0.6rem;">Recorded Date</th>
+                    <th>Followers / Network</th>
+                    <th>Views / Impressions</th>
+                    <th>Likes / Engagement Log</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in snapshots %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 0.6rem; color: var(--text-muted);">{{ s.recorded_at|date:"M d, Y H:i" }}</td>
+                    <td><strong style="color: var(--marker-blue);">{{ s.followers }}</strong></td>
+                    <td><strong style="color: var(--accent-green);">{{ s.views }}</strong></td>
+                    <td>{{ s.likes_engagement }} interactions</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color: var(--text-muted); text-align: center; padding: 1.5rem;">No historical snapshot logs recorded yet. Click "Refresh Live Stats" above to generate a new snapshot.</p>
+    {% endif %}
+</div>
+{% endblock %}

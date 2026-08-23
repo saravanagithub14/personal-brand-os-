@@ -1,13 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Kalam:wght@400;700&family=Patrick+Hand&family=Outfit:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg-primary: #0f172a;
-  --bg-card: #1e293b;
-  --bg-hover: #334155;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --accent-blue: #38bdf8;
-  --accent-purple: #c084fc;
-  --accent-green: #4ade80;
-  --border-color: #334155;
+  --bg-primary: #f6f8fb;
+  --bg-board: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: #e0edff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  
+  /* Blue Marker Palette */
+  --marker-blue: #0052cc;
+  --marker-blue-dark: #003d99;
+  --marker-blue-light: #ebf3ff;
+  --marker-blue-border: #2563eb;
+  
+  --accent-blue: #0052cc;
+  --accent-purple: #7c3aed;
+  --accent-green: #059669;
+  --border-color: #bfdbfe;
+  
+  --marker-font: 'Caveat', 'Kalam', 'Patrick Hand', cursive;
+  --body-font: 'Patrick Hand', 'Kalam', 'Caveat', cursive;
+  --card-shadow: 4px 4px 0px rgba(37, 99, 235, 0.15);
+}
+
+/* Dark Mode Chalkboard Palette & Typography Variables */
+[data-theme="dark"] {
+  --bg-primary: #202020;
+  --bg-board: #1c1c1c;
+  --bg-card: #242424;
+  --bg-hover: rgba(255, 255, 255, 0.08);
+  --text-main: #e8e8e0;
+  --text-muted: #a3a39f;
+  
+  --marker-blue: #b3cde0;
+  --marker-blue-dark: #93c5fd;
+  --marker-blue-light: rgba(232, 232, 224, 0.08);
+  --marker-blue-border: rgba(232, 232, 224, 0.7);
+  
+  --accent-blue: #b3cde0;
+  --accent-purple: #b8a3d9;
+  --accent-green: #a3d9c4;
+  --border-color: rgba(232, 232, 224, 0.35);
+  --card-shadow: none;
+
+  /* Switch body font to authentic handwritten Patrick Hand / Kalam in dark mode */
+  --body-font: 'Patrick Hand', 'Kalam', cursive;
 }
 
 * {
@@ -17,81 +55,176 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--body-font);
   background-color: var(--bg-primary);
+  background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+}
+
+/* Authentic Chalkboard Slate Texture Background */
+[data-theme="dark"] body {
+  background-color: #202020;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.09) 1.2px, transparent 1.2px),
+    radial-gradient(rgba(255, 255, 255, 0.04) 2.2px, transparent 2.2px);
+  background-size: 24px 24px, 48px 48px;
+  color: #e8e8e0;
 }
 
 a {
-  color: var(--accent-blue);
+  color: var(--marker-blue);
   text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
 }
 
 a:hover {
+  color: var(--marker-blue-dark);
   text-decoration: underline;
 }
 
-/* Header Navbar */
+/* Handwritten Marker & Chalk Headings */
+h1, h2, h3, h4, h5, .marker-text {
+  font-family: var(--marker-font);
+  color: var(--marker-blue);
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  line-height: 1.2;
+  transition: color 250ms ease, text-shadow 250ms ease;
+}
+
+/* Chalk Stroke Texture Effect */
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h3, 
+[data-theme="dark"] h4, 
+[data-theme="dark"] h5, 
+[data-theme="dark"] .marker-text,
+[data-theme="dark"] .schedule-card-title,
+[data-theme="dark"] .whiteboard-schedule-title {
+  text-shadow: 0 0 1px rgba(255,255,255,0.5), 0 0 2px rgba(255,255,255,0.3);
+  letter-spacing: 0.5px;
+}
+
+h1 { font-size: 2.4rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.6rem; }
+h4 { font-size: 1.3rem; }
+
+/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: var(--bg-card);
-  border-bottom: 1px solid var(--border-color);
+  padding: 0.85rem 2rem;
+  background-color: var(--bg-board);
+  border-bottom: 3px dashed var(--marker-blue-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: background-color 250ms ease, border-color 250ms ease;
+}
+
+[data-theme="dark"] .navbar {
+  box-shadow: none;
+  border-bottom: 2px dashed rgba(232, 232, 224, 0.4);
 }
 
 .navbar .brand-title {
-  font-size: 1.25rem;
+  font-family: var(--marker-font);
+  font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--marker-blue);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .nav-links {
   display: flex;
   gap: 1.5rem;
   align-items: center;
+  font-family: var(--marker-font);
+  font-size: 1.2rem;
 }
 
-/* Layout container */
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  background: var(--bg-card);
+  border: 2px solid var(--marker-blue-border);
+  color: var(--text-main);
+  font-family: var(--marker-font);
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+  transition: all 250ms ease;
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  box-shadow: none;
+  border-color: rgba(232, 232, 224, 0.6);
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.04) rotate(-0.5deg);
+  background-color: var(--bg-hover);
+}
+
+/* App Container Layout */
 .app-container {
   display: flex;
   flex: 1;
 }
 
+/* Sidebar */
 .sidebar {
   width: 260px;
-  background-color: var(--bg-card);
-  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-board);
+  border-right: 2px dashed var(--border-color);
   padding: 1.5rem 1rem;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.02);
+  transition: background-color 250ms ease, border-color 250ms ease;
+}
+
+[data-theme="dark"] .sidebar {
+  box-shadow: none;
 }
 
 .sidebar-menu {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .sidebar-menu a {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
-  color: var(--text-muted);
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  padding: 0.7rem 1.1rem;
+  color: var(--text-main);
+  font-family: var(--marker-font);
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  border: 1.5px solid transparent;
+  transition: all 200ms ease;
 }
 
 .sidebar-menu a:hover, .sidebar-menu a.active {
-  color: var(--text-main);
+  color: var(--marker-blue);
   background-color: var(--bg-hover);
+  border-color: var(--marker-blue-border);
   text-decoration: none;
+  transform: scale(1.02) rotate(-0.4deg);
 }
 
 .main-content {
@@ -99,13 +232,25 @@ a:hover {
   padding: 2rem;
 }
 
-/* Cards & Components */
+/* Organic Hand-Drawn Cards with Staggered Sketchy Variations */
 .card {
   background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
+  border: 2.5px solid var(--marker-blue-border);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  transition: background-color 250ms ease, border-color 250ms ease, transform 200ms ease;
+}
+
+.grid-3 > .card:nth-child(1) { border-radius: 255px 18px 225px 12px/14px 225px 18px 255px; transform: rotate(-0.3deg); }
+.grid-3 > .card:nth-child(2) { border-radius: 14px 225px 18px 255px/255px 18px 225px 14px; transform: rotate(0.4deg); }
+.grid-3 > .card:nth-child(3) { border-radius: 225px 14px 255px 18px/18px 255px 14px 225px; transform: rotate(-0.2deg); }
+
+[data-theme="dark"] .card {
+  border: 1.5px solid rgba(232, 232, 224, 0.6);
+  box-shadow: none !important;
 }
 
 .grid-3 {
@@ -114,44 +259,356 @@ a:hover {
   gap: 1.5rem;
 }
 
-.btn {
-  display: inline-block;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.5rem;
-  border: none;
-  font-weight: 600;
+/* Generic Button & Marker Styling */
+button {
+  font-family: var(--marker-font);
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(135deg, var(--accent-blue), #0284c7);
-  color: #fff;
-  transition: opacity 0.2s ease;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  transition: all 200ms ease;
 }
 
-.btn:hover {
-  opacity: 0.9;
-  text-decoration: none;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  border: 2px solid var(--marker-blue-dark);
+  font-family: var(--marker-font);
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #0052cc !important;
+  color: #ffffff !important;
+  box-shadow: 3px 3px 0px var(--marker-blue-dark);
+  transition: all 200ms ease;
+  text-decoration: none !important;
 }
 
+.btn-secondary {
+  background-color: #dce8ff !important;
+  color: #0a2540 !important;
+  border: 2px solid #0052cc !important;
+  box-shadow: 3px 3px 0px rgba(0, 82, 204, 0.25) !important;
+  border-radius: 15px 255px 15px 225px/225px 15px 255px 15px;
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  background-color: #dce8ff !important;
+  color: #0052cc !important;
+  border: 2px solid var(--marker-blue-dark) !important;
+  box-shadow: 2px 2px 0px var(--marker-blue-dark) !important;
+  font-family: var(--marker-font);
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .btn {
+  color: #1c1c1c !important;
+  background-color: #e8e8e0 !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-secondary {
+  background-color: #1e293b !important;
+  color: #38bdf8 !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.3) !important;
+  text-shadow: 0 0 2px rgba(56, 189, 248, 0.5) !important;
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  background-color: #2d3748 !important;
+  color: #e8e8e0 !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow: none !important;
+}
+
+.btn:hover, .btn-secondary:hover, .theme-toggle-btn:hover {
+  transform: translate(-1px, -1px) rotate(0.5deg);
+}
+
+/* Forms & Inputs */
 .form-group {
   margin-bottom: 1.25rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  font-family: var(--marker-font);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--marker-blue);
 }
 
 .form-control {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-primary);
+  padding: 0.65rem 1rem;
+  border-radius: 255px 12px 225px 15px/12px 225px 15px 255px;
+  border: 2px solid var(--border-color);
+  background-color: var(--bg-card);
   color: var(--text-main);
-  font-size: 1rem;
+  font-family: var(--body-font);
+  font-size: 1.1rem;
+  transition: border-color 200ms ease, background-color 200ms ease;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th {
+  font-family: var(--marker-font);
+  font-size: 1.2rem;
+  color: var(--marker-blue);
+  border-bottom: 2px dashed var(--border-color);
+  padding: 0.6rem 0.75rem;
+}
+
+td {
+  padding: 0.75rem;
+  border-bottom: 1px dashed var(--border-color);
+  font-size: 1.05rem;
 }
 
 .auth-card {
   max-width: 420px;
   margin: 4rem auto;
+}
+
+/* Whiteboard & Chalkboard Schedule Container */
+.whiteboard-schedule-container {
+  background-color: #faf7f2;
+  background-image: 
+    radial-gradient(rgba(148, 163, 184, 0.25) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  border: 3px dashed #cbd5e1;
+  border-radius: 255px 20px 225px 18px/18px 225px 20px 255px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+  transition: background-color 250ms ease, border-color 250ms ease;
+}
+
+[data-theme="dark"] .whiteboard-schedule-container {
+  background-color: #1c1c1c;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px),
+    radial-gradient(rgba(255, 255, 255, 0.04) 2px, transparent 2px);
+  background-size: 24px 24px, 48px 48px;
+  border: 2px dashed rgba(232, 232, 224, 0.4);
+  box-shadow: none !important;
+}
+
+.whiteboard-schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px dashed var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.whiteboard-schedule-title {
+  font-family: var(--marker-font);
+  font-size: 2.2rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.schedule-card {
+  background: var(--bg-card);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  border: 2.5px solid var(--text-main);
+  padding: 1.35rem 1.25rem;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.06);
+  position: relative;
+  transition: background-color 250ms ease, border-color 250ms ease, transform 200ms ease;
+}
+
+.schedule-card:nth-child(1) { border-radius: 245px 14px 220px 18px/16px 225px 14px 245px; transform: rotate(-0.3deg); }
+.schedule-card:nth-child(2) { border-radius: 18px 225px 14px 245px/245px 16px 220px 18px; transform: rotate(0.4deg); }
+.schedule-card:nth-child(3) { border-radius: 220px 16px 245px 14px/14px 245px 18px 220px; transform: rotate(-0.4deg); }
+.schedule-card:nth-child(4) { border-radius: 14px 245px 18px 220px/220px 18px 245px 16px; transform: rotate(0.2deg); }
+
+[data-theme="dark"] .schedule-card {
+  box-shadow: none !important;
+  border-width: 1.5px;
+}
+
+.schedule-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px dashed currentColor;
+}
+
+.schedule-card-title {
+  font-family: var(--marker-font);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.schedule-icon-svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 2.2;
+  fill: none;
+  stroke: currentColor;
+}
+
+/* Category Accent Styles (Light Marker & Chalkboard Desaturated Pastels) */
+
+/* Daily - Coral -> Dusty Rose Chalk #d9a3a3 */
+.card-daily {
+  border-color: #e05252;
+  color: #e05252;
+}
+.card-daily .schedule-card-header { border-color: #e05252; }
+.card-daily .wb-checkbox { border-color: #e05252; color: #e05252; }
+.card-daily .wb-task-item.completed .wb-checkbox { background-color: #e05252; color: #ffffff; }
+
+[data-theme="dark"] .card-daily { border-color: #d9a3a3; color: #d9a3a3; }
+[data-theme="dark"] .card-daily .schedule-card-header { border-color: #d9a3a3; }
+[data-theme="dark"] .card-daily .wb-checkbox { border-color: #d9a3a3; color: #d9a3a3; }
+[data-theme="dark"] .card-daily .wb-task-item.completed .wb-checkbox { background-color: #d9a3a3; color: #202020; }
+
+/* Weekly - Teal -> Soft Mint Chalk #a3d9c4 */
+.card-weekly {
+  border-color: #0d9488;
+  color: #0d9488;
+}
+.card-weekly .schedule-card-header { border-color: #0d9488; }
+.card-weekly .wb-checkbox { border-color: #0d9488; color: #0d9488; }
+.card-weekly .wb-task-item.completed .wb-checkbox { background-color: #0d9488; color: #ffffff; }
+
+[data-theme="dark"] .card-weekly { border-color: #a3d9c4; color: #a3d9c4; }
+[data-theme="dark"] .card-weekly .schedule-card-header { border-color: #a3d9c4; }
+[data-theme="dark"] .card-weekly .wb-checkbox { border-color: #a3d9c4; color: #a3d9c4; }
+[data-theme="dark"] .card-weekly .wb-task-item.completed .wb-checkbox { background-color: #a3d9c4; color: #202020; }
+
+/* Monthly - Purple -> Soft Lavender Chalk #b8a3d9 */
+.card-monthly {
+  border-color: #8d55e8;
+  color: #8d55e8;
+}
+.card-monthly .schedule-card-header { border-color: #8d55e8; }
+.card-monthly .wb-checkbox { border-color: #8d55e8; color: #8d55e8; }
+.card-monthly .wb-task-item.completed .wb-checkbox { background-color: #8d55e8; color: #ffffff; }
+
+[data-theme="dark"] .card-monthly { border-color: #b8a3d9; color: #b8a3d9; }
+[data-theme="dark"] .card-monthly .schedule-card-header { border-color: #b8a3d9; }
+[data-theme="dark"] .card-monthly .wb-checkbox { border-color: #b8a3d9; color: #b8a3d9; }
+[data-theme="dark"] .card-monthly .wb-task-item.completed .wb-checkbox { background-color: #b8a3d9; color: #202020; }
+
+/* Yearly - Amber -> Soft Gold / Cream Chalk #d9caac */
+.card-yearly {
+  border-color: #d97706;
+  color: #d97706;
+}
+.card-yearly .schedule-card-header { border-color: #d97706; }
+.card-yearly .wb-checkbox { border-color: #d97706; color: #d97706; }
+.card-yearly .wb-task-item.completed .wb-checkbox { background-color: #d97706; color: #ffffff; }
+
+[data-theme="dark"] .card-yearly { border-color: #d9caac; color: #d9caac; }
+[data-theme="dark"] .card-yearly .schedule-card-header { border-color: #d9caac; }
+[data-theme="dark"] .card-yearly .wb-checkbox { border-color: #d9caac; color: #d9caac; }
+[data-theme="dark"] .card-yearly .wb-task-item.completed .wb-checkbox { background-color: #d9caac; color: #202020; }
+
+/* Task List Items */
+.wb-task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.wb-task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Hand-Drawn Wobbly Checkbox Outlines (No perfect circles!) */
+.wb-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid currentColor;
+  border-radius: 48% 52% 58% 42% / 52% 44% 56% 48%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--marker-font);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-top: 0.15rem;
+  transition: all 0.15s ease;
+}
+
+.wb-task-text {
+  font-family: var(--body-font);
+  font-size: 1.1rem;
+  color: var(--text-main);
+  line-height: 1.4;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .wb-task-text {
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.wb-task-item.completed .wb-task-text {
+  text-decoration: line-through;
+  opacity: 0.55;
+  color: var(--text-muted);
+}
+
+/* Chalk dust hover effect */
+.wb-task-item:hover .wb-task-text {
+  transform: translateX(2px);
+}
+
+/* Background Low-Opacity Doodle Deco */
+.whiteboard-doodle {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.08;
+}
+
+[data-theme="dark"] .whiteboard-doodle {
+  opacity: 0.12;
 }

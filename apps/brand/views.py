@@ -1,9 +1,41 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions
 from .models import BrandProfile, BrandVoice
 from .serializers import BrandProfileSerializer, BrandVoiceSerializer
+from apps.projects.models import Project
+from apps.content.models import ContentItem
+
+User = get_user_model()
+
+
+class PublicPortfolioView(View):
+    def get(self, request, username=None):
+        if username:
+            target_user = get_object_or_404(User, username=username)
+        elif request.user.is_authenticated:
+            target_user = request.user
+        else:
+            target_user = User.objects.first()
+            if not target_user:
+                return render(request, "brand/public_portfolio.html", {"profile": None})
+
+        profile, _ = BrandProfile.objects.get_or_create(user=target_user)
+        projects = Project.objects.filter(user=target_user).order_by("-updated_at")
+        published_content = ContentItem.objects.filter(user=target_user, status="PUBLISHED").order_by("-published_at", "-updated_at")
+        from apps.social.models import SocialAccount
+        social_accounts = SocialAccount.objects.filter(user=target_user, active=True)
+
+        context = {
+            "portfolio_user": target_user,
+            "profile": profile,
+            "projects": projects,
+            "published_content": published_content,
+            "social_accounts": social_accounts,
+        }
+        return render(request, "brand/public_portfolio.html", context)
 
 
 class BrandDetailView(LoginRequiredMixin, View):
@@ -56,3 +88,4 @@ class BrandVoiceAPIView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         voice, _ = BrandVoice.objects.get_or_create(user=self.request.user)
         return voice
+

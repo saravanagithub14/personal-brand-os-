@@ -5,30 +5,467 @@
 {% block content %}
 <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
-        <h2>Welcome back, {{ profile.name|default:user.username }}! 👋</h2>
-        <p style="color: var(--text-muted); margin-top: 0.25rem;">
-            Niche: <strong>{{ profile.niche|default:"Set your niche in Brand Strategy" }}</strong> | 
-            Title: {{ profile.professional_title|default:"Personal Brand Operating System" }}
+        <h2 style="font-family: var(--marker-font); color: var(--marker-blue); font-size: 2.2rem;">Welcome back, {{ profile.name|default:user.username }}! 👋</h2>
+        <p style="color: var(--text-muted); margin-top: 0.25rem; font-size: 1rem;">
+            Niche: <strong style="color: var(--marker-blue-dark);">{{ profile.niche|default:"Set your niche in Brand Strategy" }}</strong> | 
+            Title: <span style="font-weight: 500;">{{ profile.professional_title|default:"Personal Brand Operating System" }}</span>
         </p>
     </div>
     <a href="{% url 'content:editor_create' %}" class="btn">＋ Create Content</a>
 </div>
 
 <div class="grid-3" style="margin-bottom: 1.5rem;">
-    <div class="card">
+    <div class="card" style="border-top: 4px solid var(--accent-blue);">
         <h3>💡 Ideas Bank</h3>
-        <p style="font-size: 2rem; font-weight: bold; color: var(--accent-blue); margin-top: 0.5rem;">{{ metrics.ideas_count }}</p>
-        <a href="{% url 'content:ideas' %}" style="font-size: 0.85rem;">View Ideas →</a>
+        <p style="font-family: var(--marker-font); font-size: 2.8rem; font-weight: bold; color: var(--marker-blue); margin-top: 0.25rem;">{{ metrics.ideas_count }}</p>
+        <a href="{% url 'content:ideas' %}" style="font-family: var(--marker-font); font-size: 1.15rem; font-weight: 700;">View Ideas →</a>
     </div>
-    <div class="card">
-        <h3>✍️ Drafts & Editing</h3>
-        <p style="font-size: 2rem; font-weight: bold; color: var(--accent-purple); margin-top: 0.5rem;">{{ metrics.drafts_count }}</p>
-        <a href="{% url 'content:list' %}?status=DRAFT" style="font-size: 0.85rem;">View Drafts →</a>
+    <div class="card" style="border-top: 4px solid var(--accent-purple);">
+        <h3 style="color: var(--accent-purple);">✍️ Drafts & Editing</h3>
+        <p style="font-family: var(--marker-font); font-size: 2.8rem; font-weight: bold; color: var(--accent-purple); margin-top: 0.25rem;">{{ metrics.drafts_count }}</p>
+        <a href="{% url 'content:list' %}?status=DRAFT" style="font-family: var(--marker-font); font-size: 1.15rem; font-weight: 700; color: var(--accent-purple);">View Drafts →</a>
     </div>
-    <div class="card">
-        <h3>📅 Scheduled / Approved</h3>
-        <p style="font-size: 2rem; font-weight: bold; color: var(--accent-green); margin-top: 0.5rem;">{{ metrics.scheduled_count }}</p>
-        <a href="{% url 'calendar:index' %}" style="font-size: 0.85rem;">View Calendar →</a>
+    <div class="card" style="border-top: 4px solid var(--accent-green);">
+        <h3 style="color: var(--accent-green);">📅 Scheduled / Approved</h3>
+        <p style="font-family: var(--marker-font); font-size: 2.8rem; font-weight: bold; color: var(--accent-green); margin-top: 0.25rem;">{{ metrics.scheduled_count }}</p>
+        <a href="{% url 'calendar:index' %}" style="font-family: var(--marker-font); font-size: 1.15rem; font-weight: 700; color: var(--accent-green);">View Calendar →</a>
+    </div>
+</div>
+
+<!-- 📰 Daily AI News Briefing & Trend Radar -->
+{% if daily_news %}
+<div class="whiteboard-schedule-container" style="border-color: var(--accent-purple); background-color: var(--bg-card); margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+            <h3 style="color: var(--accent-purple); font-family: var(--marker-font); font-size: 1.6rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                📰 Daily AI News Briefing & Tech Trend Radar
+            </h3>
+            <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.2rem;">
+                Curated daily AI & computational research news parsed into instant post hooks for your personal brand.
+            </p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
+        {% for article in daily_news %}
+        <div style="background: var(--bg-card); padding: 1rem; border-radius: 12px; border: 1.5px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                    <span style="font-size: 0.8rem; font-weight: 700; background: var(--accent-purple); color: #ffffff; padding: 0.15rem 0.5rem; border-radius: 10px;">
+                        {{ article.source }}
+                    </span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">{{ article.published_at|date:"M d" }}</span>
+                </div>
+                <h4 style="color: var(--text-main); font-size: 1.15rem; font-weight: 700; margin: 0.4rem 0;">
+                    {{ article.title }}
+                </h4>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.4; margin-bottom: 0.5rem;">
+                    {{ article.summary }}
+                </p>
+                <div style="background: var(--marker-blue-light); padding: 0.6rem; border-radius: 8px; font-size: 0.88rem; color: var(--marker-blue); font-style: italic; border-left: 3px solid var(--marker-blue);">
+                    {{ article.ai_hook }}
+                </div>
+            </div>
+
+            <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem;">
+                <form method="POST" action="{% url 'news:create_draft' article.id %}" style="width: 100%;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary" style="font-size: 0.88rem; width: 100%; padding: 0.3rem 0.6rem; text-align: center;">
+                        ⚡ Turn Into Post Draft →
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- 🚨 Urgent Brand Plan Alert Banner -->
+{% if urgent_brand_alerts %}
+<div class="whiteboard-schedule-container" style="border-color: #c5221f; background-color: #fce8e6; margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 style="color: #c5221f; font-family: var(--marker-font); font-size: 1.6rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                🚨 BRAND PLAN ALERT: {{ urgent_brand_alerts|length }} Handle{% if urgent_brand_alerts|length > 1 %}s{% endif %} Behind Schedule!
+            </h3>
+            <p style="color: #5f6368; font-size: 1rem; margin-top: 0.25rem;">
+                Your latest post dates do not match your active personal brand plan target. Draft new posts or update post dates to restore your consistency score.
+            </p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        {% for alert in urgent_brand_alerts %}
+        <div style="background: #ffffff; padding: 0.9rem; border-radius: 12px; border: 2px dashed #c5221f; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="color: #c5221f; font-size: 1.1rem; font-family: var(--marker-font);">
+                    {{ alert.platform_display }} ({{ alert.handle }})
+                </strong>
+                <p style="font-size: 0.88rem; color: #5f6368; margin-top: 0.2rem;">
+                    Last post: <strong>{{ alert.days_since }} days ago</strong> (Brand Plan: {{ alert.target_days }}d target)
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.4rem;">
+                <a href="{% url 'content:editor_create' %}?platform={{ alert.platform }}" class="btn" style="font-size: 0.85rem; padding: 0.25rem 0.5rem;">
+                    ✍️ Draft
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- 📱 Social Media Handles & Analytics Overview Center -->
+<div class="whiteboard-schedule-container" style="border-color: var(--marker-blue-border); background-color: var(--bg-card);">
+    <div class="whiteboard-schedule-header">
+        <div>
+            <h3 class="whiteboard-schedule-title" style="color: var(--marker-blue);">
+                📱 Social Media Handles & Automated Channel Analytics
+            </h3>
+            <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.2rem;">
+                Enter any social handle ID (@cellstocode, saravanagithub14, etc.) to automatically fetch and update stats live.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <form method="POST" action="{% url 'social:sync_all' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary" title="Fetch live stats for all connected handles">
+                    🔄 Auto-Sync All Stats
+                </button>
+            </form>
+            <button onclick="document.getElementById('addSocialModal').style.display='block';" class="btn">
+                ＋ Add / Update Social Handle
+            </button>
+        </div>
+    </div>
+
+    <!-- Analytics Summary KPI Banner -->
+    <!-- Analytics Summary KPI Banner -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background: var(--marker-blue-light); padding: 1.1rem; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; border: 2px solid var(--marker-blue-border);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted);">Total Audience Reach</h4>
+            <p style="font-family: var(--marker-font); font-size: 2.4rem; font-weight: 700; color: var(--marker-blue);">
+                {{ social_analytics.total_followers|default:"0" }} <span style="font-size: 1.1rem;">followers</span>
+            </p>
+        </div>
+        <div style="background: var(--marker-blue-light); padding: 1.1rem; border-radius: 15px 255px 15px 225px/225px 15px 255px 15px; border: 2px solid var(--accent-green);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted);">Monthly Impressions</h4>
+            <p style="font-family: var(--marker-font); font-size: 2.4rem; font-weight: 700; color: var(--accent-green);">
+                {{ social_analytics.total_impressions|default:"0" }} <span style="font-size: 1.1rem;">views</span>
+            </p>
+        </div>
+        <div style="background: var(--marker-blue-light); padding: 1.1rem; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; border: 2px solid var(--accent-purple);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted);">🔥 Consistency Health</h4>
+            <p style="font-family: var(--marker-font); font-size: 2.4rem; font-weight: 700; color: var(--accent-purple);">
+                {{ consistency_radar.score|default:"100" }}% <span style="font-size: 1rem;">on track</span>
+            </p>
+        </div>
+        <div style="background: var(--marker-blue-light); padding: 1.1rem; border-radius: 15px 255px 15px 225px/225px 15px 255px 15px; border: 2px solid var(--border-color);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted);">Channels Status</h4>
+            <p style="font-family: var(--marker-font); font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-top: 0.3rem;">
+                🟢 {{ consistency_radar.on_track_count }} Active | 🔴 {{ consistency_radar.overdue_count }} Due
+            </p>
+        </div>
+    </div>
+
+    <!-- Active Social Handles Cards Grid -->
+    {% if social_accounts %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+            {% for acc in social_accounts %}
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; border: 2px solid var(--marker-blue-border); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <span style="font-family: var(--marker-font); font-size: 1.3rem; font-weight: 700; color: var(--marker-blue); display: inline-flex; align-items: center;">
+                            {% include "social/includes/platform_logo.html" with platform=acc.platform %} {{ acc.get_platform_display }}
+                        </span>
+                        <span style="font-family: var(--marker-font); font-size: 0.85rem; background: {{ acc.health_badge.bg }}; color: {{ acc.health_badge.color }}; border: 1px solid {{ acc.health_badge.border }}; padding: 0.15rem 0.5rem; border-radius: 12px; font-weight: 700;">
+                            {{ acc.health_badge.emoji }} {{ acc.health_badge.label }}
+                        </span>
+                    </div>
+                    <p style="font-family: var(--marker-font); font-size: 1.45rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.3rem;">
+                        {{ acc.handle }}
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px dashed var(--border-color); padding-top: 0.4rem; margin-top: 0.4rem; font-size: 0.95rem;">
+                        <span>Audience: <strong style="color: var(--marker-blue);">{{ acc.followers_count }}</strong></span>
+                        <span>Views: <strong style="color: var(--accent-green);">{{ acc.total_impressions }}</strong></span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 0.8rem;">
+                    <a href="{% url 'social:account_detail' acc.id %}" class="btn btn-secondary" style="font-size: 0.95rem; width: 100%; padding: 0.35rem 0.6rem; text-align: center;">
+                        📊 View Detailed Analytics →
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Default Pre-populated Social Handles Showcase / Onboarding -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; border: 2px dashed var(--accent-purple);">
+                <span style="font-family: var(--marker-font); font-size: 1.3rem; color: var(--accent-purple); font-weight: 700;">🧬 Instagram</span>
+                <p style="font-family: var(--marker-font); font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin: 0.2rem 0;">@cellstocode</p>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Suggested handle for "Cells to Code" origin story & reels.</p>
+                <button onclick="prefillSocialModal('INSTAGRAM', '@cellstocode', 'https://instagram.com/cellstocode')" class="btn btn-secondary" style="margin-top: 0.6rem; font-size: 1rem; padding: 0.3rem 0.8rem;">＋ Connect Instagram</button>
+            </div>
+
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: 15px 255px 15px 225px/225px 15px 255px 15px; border: 2px dashed var(--marker-blue-border);">
+                <span style="font-family: var(--marker-font); font-size: 1.3rem; color: var(--marker-blue); font-weight: 700;">💼 LinkedIn</span>
+                <p style="font-family: var(--marker-font); font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin: 0.2rem 0;">Saravana Perumal R.</p>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Gen AI Engineer & Mentor professional profile.</p>
+                <button onclick="prefillSocialModal('LINKEDIN', 'Saravana Perumal R.', 'https://linkedin.com/in/saravanaperumalr')" class="btn btn-secondary" style="margin-top: 0.6rem; font-size: 1rem; padding: 0.3rem 0.8rem;">＋ Connect LinkedIn</button>
+            </div>
+
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; border: 2px dashed var(--accent-green);">
+                <span style="font-family: var(--marker-font); font-size: 1.3rem; color: var(--accent-green); font-weight: 700;">💻 GitHub</span>
+                <p style="font-family: var(--marker-font); font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin: 0.2rem 0;">@saravanagithub14</p>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">20+ Gen AI, RAG & Agentic engineering repositories.</p>
+                <button onclick="prefillSocialModal('GITHUB', '@saravanagithub14', 'https://github.com/saravanagithub14')" class="btn btn-secondary" style="margin-top: 0.6rem; font-size: 1rem; padding: 0.3rem 0.8rem;">＋ Connect GitHub</button>
+            </div>
+
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: 15px 255px 15px 225px/225px 15px 255px 15px; border: 2px dashed var(--accent-blue);">
+                <span style="font-family: var(--marker-font); font-size: 1.3rem; color: var(--accent-blue); font-weight: 700;">🐦 X / Twitter</span>
+                <p style="font-family: var(--marker-font); font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin: 0.2rem 0;">@saravana_codes</p>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Gen AI breakdowns, RAG research, and technical threads.</p>
+                <button onclick="prefillSocialModal('X_TWITTER', '@saravana_codes', 'https://x.com/saravana_codes')" class="btn btn-secondary" style="margin-top: 0.6rem; font-size: 1rem; padding: 0.3rem 0.8rem;">＋ Connect X / Twitter</button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal Form for Add/Update Social Handle -->
+<div id="addSocialModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+    <div style="background: var(--bg-card); max-width: 480px; margin: 5% auto; padding: 2rem; border-radius: 255px 15px 225px 15px/15px 225px 15px 255px; border: 3px solid var(--marker-blue-border); position: relative;">
+        <h3 style="font-family: var(--marker-font); color: var(--marker-blue); font-size: 1.8rem; margin-bottom: 1rem;">
+            📱 Add or Update Social Media Handle
+        </h3>
+        <form method="POST" action="{% url 'dashboard:index' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_social_account">
+            
+            <div class="form-group">
+                <label for="social_platform">Platform</label>
+                <select name="platform" id="social_platform" class="form-control" required>
+                    <option value="INSTAGRAM">Instagram 🧬</option>
+                    <option value="LINKEDIN">LinkedIn 💼</option>
+                    <option value="FACEBOOK">Facebook 📘</option>
+                    <option value="X_TWITTER">X / Twitter 🐦</option>
+                    <option value="YOUTUBE">YouTube ▶️</option>
+                    <option value="GITHUB">GitHub 💻</option>
+                    <option value="THREADS">Threads 🧵</option>
+                    <option value="MEDIUM">Medium ✍️</option>
+                    <option value="ORCID">ORCID 🔬</option>
+                    <option value="RESEARCHGATE">ResearchGate 🔬</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="social_handle">Social Handle / Username</label>
+                <input type="text" name="handle" id="social_handle" class="form-control" placeholder="e.g. @cellstocode or @saravana.codes" required>
+            </div>
+
+            <div class="form-group">
+                <label for="social_url">Profile URL</label>
+                <input type="url" name="profile_url" id="social_url" class="form-control" placeholder="https://instagram.com/cellstocode">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="followers_count">Followers Count</label>
+                    <input type="number" name="followers_count" id="followers_count" class="form-control" placeholder="e.g. 1500" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="total_impressions">Monthly Views / Impressions</label>
+                    <input type="number" name="total_impressions" id="total_impressions" class="form-control" placeholder="e.g. 25000" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="engagement_rate">Engagement Rate (%)</label>
+                <input type="number" step="0.1" name="engagement_rate" id="engagement_rate" class="form-control" placeholder="e.g. 4.8" value="0.0">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" onclick="document.getElementById('addSocialModal').style.display='none';" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn">💾 Save Handle & Stats</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Hand-Drawn Whiteboard / Chalkboard Cleaning Schedule System -->
+<div class="whiteboard-schedule-container">
+    <!-- Low-Opacity Background Decorative Doodles -->
+    <svg class="whiteboard-doodle" style="top: 10px; right: 20px; width: 120px; height: 120px;" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="4 4" />
+        <circle cx="50" cy="50" r="25" stroke="currentColor" stroke-width="1.5" fill="none" />
+    </svg>
+
+    <div class="whiteboard-schedule-header">
+        <div>
+            <h3 class="whiteboard-schedule-title">
+                📋 Brand Execution & Maintenance Schedule
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.2rem;">
+                Your tactile, hand-drawn routine for keeping your personal brand knowledge, content, and strategy in prime shape.
+            </p>
+        </div>
+        <span style="font-family: var(--marker-font); font-size: 1.2rem; color: var(--accent-green); font-weight: 700; background: var(--marker-blue-light); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1.5px solid var(--border-color);">
+            Handmade Productivity System ✏️
+        </span>
+    </div>
+
+    <div class="schedule-grid">
+        <!-- Daily Routines (Coral / Dusty Rose Chalk) -->
+        <div class="schedule-card card-daily">
+            <div class="schedule-card-header">
+                <h4 class="schedule-card-title">Daily Routines</h4>
+                <!-- Plant line SVG -->
+                <svg class="schedule-icon-svg" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-4 4m4-4l4 4M5 12h14" />
+                </svg>
+            </div>
+            <ul class="wb-task-list">
+                <li class="wb-task-item" data-task-id="daily-1">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Review daily AI news brief & industry trends</span>
+                </li>
+                <li class="wb-task-item" data-task-id="daily-2">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Engage on 5 key posts in your niche</span>
+                </li>
+                <li class="wb-task-item" data-task-id="daily-3">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Capture quick ideas in Ideas Bank</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Weekly Execution (Deep Teal / Soft Mint Chalk) -->
+        <div class="schedule-card card-weekly">
+            <div class="schedule-card-header">
+                <h4 class="schedule-card-title">Weekly Execution</h4>
+                <!-- Coffee cup line SVG -->
+                <svg class="schedule-icon-svg" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3" />
+                </svg>
+            </div>
+            <ul class="wb-task-list">
+                <li class="wb-task-item" data-task-id="weekly-1">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Generate weekly AI content plan</span>
+                </li>
+                <li class="wb-task-item" data-task-id="weekly-2">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Draft & edit 3 platform-adapted posts</span>
+                </li>
+                <li class="wb-task-item" data-task-id="weekly-3">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Repurpose top post into script / short</span>
+                </li>
+                <li class="wb-task-item" data-task-id="weekly-4">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Run AI Content Reviewer on pending drafts</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Monthly Growth (Warm Purple / Lavender Chalk) -->
+        <div class="schedule-card card-monthly">
+            <div class="schedule-card-header">
+                <h4 class="schedule-card-title">Monthly Growth</h4>
+                <!-- Spark / Rocket line SVG -->
+                <svg class="schedule-icon-svg" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <ul class="wb-task-list">
+                <li class="wb-task-item" data-task-id="monthly-1">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Update Brand Knowledge Base & GitHub projects</span>
+                </li>
+                <li class="wb-task-item" data-task-id="monthly-2">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Audit Content Pillar allocation %</span>
+                </li>
+                <li class="wb-task-item" data-task-id="monthly-3">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Refresh target audience & positioning strategy</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Yearly Milestones (Rich Amber / Gold Chalk) -->
+        <div class="schedule-card card-yearly">
+            <div class="schedule-card-header">
+                <h4 class="schedule-card-title">Yearly Milestones</h4>
+                <!-- Trophy line SVG -->
+                <svg class="schedule-icon-svg" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 21h8m-4-4v4m-5-9a6 6 0 1012 0V3H7v5zM3 6h4m10 0h4" />
+                </svg>
+            </div>
+            <ul class="wb-task-list">
+                <li class="wb-task-item" data-task-id="yearly-1">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Perform annual personal brand strategy audit</span>
+                </li>
+                <li class="wb-task-item" data-task-id="yearly-2">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Publish flagship engineering case study / portfolio review</span>
+                </li>
+                <li class="wb-task-item" data-task-id="yearly-3">
+                    <div class="wb-checkbox"></div>
+                    <span class="wb-task-text">Align career goals & personal brand roadmap</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem; background: var(--marker-blue-light); border: 2.5px dashed var(--marker-blue-border);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 style="font-size: 1.8rem; color: var(--marker-blue); display: flex; align-items: center; gap: 0.5rem; font-family: var(--marker-font);">
+                🌐 Public Portfolio Pages & Showcase
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+                Your public personal brand showcase with your bio, expertise, projects hub, and published work.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{{ public_portfolio_path }}" target="_blank" class="btn">👁️ View Public Portfolio</a>
+            <button onclick="navigator.clipboard.writeText(window.location.origin + '{{ public_portfolio_path }}'); alert('Public Portfolio link copied to clipboard!');" class="btn btn-secondary">📋 Copy Link</button>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.25rem;">
+        <div style="background: var(--bg-card); padding: 1rem; border-radius: 10px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,0.04);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 0.35rem; font-family: var(--marker-font);">Public Brand Page</h4>
+            <p style="font-size: 1.1rem; font-weight: 700; color: var(--marker-blue); font-family: var(--marker-font);">{{ profile.name|default:user.username }}</p>
+            <a href="{{ public_portfolio_path }}" style="font-size: 1rem; font-family: var(--marker-font); font-weight: 700; color: var(--marker-blue); margin-top: 0.25rem; display: inline-block;">Open Showcase →</a>
+        </div>
+
+        <div style="background: var(--bg-card); padding: 1rem; border-radius: 10px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,0.04);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 0.35rem; font-family: var(--marker-font);">Projects Hub</h4>
+            <p style="font-size: 1.1rem; font-weight: 700; color: var(--accent-green); font-family: var(--marker-font);">{{ public_projects.count }} Showcase Projects</p>
+            <a href="{% url 'projects:list' %}" style="font-size: 1rem; font-family: var(--marker-font); font-weight: 700; color: var(--accent-green); margin-top: 0.25rem; display: inline-block;">Manage Projects →</a>
+        </div>
+
+        <div style="background: var(--bg-card); padding: 1rem; border-radius: 10px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,0.04);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 0.35rem; font-family: var(--marker-font);">Published Articles</h4>
+            <p style="font-size: 1.1rem; font-weight: 700; color: var(--accent-purple); font-family: var(--marker-font);">{{ published_items.count }} Live Posts</p>
+            <a href="{% url 'content:list' %}?status=PUBLISHED" style="font-size: 1rem; font-family: var(--marker-font); font-weight: 700; color: var(--accent-purple); margin-top: 0.25rem; display: inline-block;">View Content →</a>
+        </div>
+
+        {% if profile.portfolio_url %}
+        <div style="background: var(--bg-card); padding: 1rem; border-radius: 10px; border: 2px solid var(--border-color); box-shadow: 2px 2px 0px rgba(0,0,0,0.04);">
+            <h4 style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 0.35rem; font-family: var(--marker-font);">External Website</h4>
+            <p style="font-size: 0.95rem; font-weight: 500; color: var(--text-main); word-break: break-all;">{{ profile.portfolio_url }}</p>
+            <a href="{{ profile.portfolio_url }}" target="_blank" style="font-size: 1rem; font-family: var(--marker-font); font-weight: 700; color: var(--marker-blue); margin-top: 0.25rem; display: inline-block;">Visit Site →</a>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -36,14 +473,14 @@
     <div class="card" style="grid-column: span 2;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3>📝 Recent Content Activity</h3>
-            <a href="{% url 'content:list' %}">View All ({{ metrics.total_content }})</a>
+            <a href="{% url 'content:list' %}" style="font-family: var(--marker-font); font-size: 1.15rem; font-weight: 700;">View All ({{ metrics.total_content }})</a>
         </div>
 
         {% if recent_items %}
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <table>
                 <thead>
-                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem;">
-                        <th style="padding: 0.5rem;">Title</th>
+                    <tr>
+                        <th>Title</th>
                         <th>Platform</th>
                         <th>Status</th>
                         <th>Last Modified</th>
@@ -51,39 +488,75 @@
                 </thead>
                 <tbody>
                     {% for item in recent_items %}
-                    <tr style="border-bottom: 1px solid var(--border-color);">
-                        <td style="padding: 0.75rem;">
+                    <tr>
+                        <td>
                             <a href="{% url 'content:editor_edit' item.pk %}"><strong>{{ item.title }}</strong></a>
                         </td>
                         <td>{{ item.get_platform_display }}</td>
-                        <td><span style="color: var(--accent-blue); font-weight: 500;">{{ item.get_status_display }}</span></td>
+                        <td><span style="color: var(--marker-blue); font-weight: 600;">{{ item.get_status_display }}</span></td>
                         <td style="color: var(--text-muted); font-size: 0.85rem;">{{ item.updated_at|date:"M d, H:i" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No content created yet. Start by creating an idea or draft!</p>
+            <p style="color: var(--text-muted); text-align: center; padding: 2rem; font-family: var(--marker-font); font-size: 1.2rem;">No content created yet. Start by creating an idea or draft!</p>
         {% endif %}
     </div>
 
     <div class="card">
         <h3>🎯 Operating System Overview</h3>
         <ul style="list-style: none; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
-            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-                <span>Active Pillars:</span> <strong>{{ metrics.pillars_count }}</strong>
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
+                <span style="font-family: var(--marker-font); font-size: 1.15rem;">Active Pillars:</span> <strong style="font-family: var(--marker-font); font-size: 1.3rem; color: var(--marker-blue);">{{ metrics.pillars_count }}</strong>
             </li>
-            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-                <span>Registered Projects:</span> <strong>{{ metrics.projects_count }}</strong>
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
+                <span style="font-family: var(--marker-font); font-size: 1.15rem;">Registered Projects:</span> <strong style="font-family: var(--marker-font); font-size: 1.3rem; color: var(--accent-green);">{{ metrics.projects_count }}</strong>
             </li>
-            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-                <span>Published Items:</span> <strong>{{ metrics.published_count }}</strong>
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
+                <span style="font-family: var(--marker-font); font-size: 1.15rem;">Published Items:</span> <strong style="font-family: var(--marker-font); font-size: 1.3rem; color: var(--accent-purple);">{{ metrics.published_count }}</strong>
             </li>
-            <li style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-                <span>Brand Profile:</span> 
-                {% if profile.niche %}<span style="color: var(--accent-green);">Configured</span>{% else %}<span style="color: var(--accent-purple);">Pending</span>{% endif %}
+            <li style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.5rem;">
+                <span style="font-family: var(--marker-font); font-size: 1.15rem;">Brand Profile:</span> 
+                {% if profile.niche %}<span style="color: var(--accent-green); font-family: var(--marker-font); font-weight: 700; font-size: 1.2rem;">Configured</span>{% else %}<span style="color: var(--accent-purple); font-family: var(--marker-font); font-weight: 700; font-size: 1.2rem;">Pending</span>{% endif %}
             </li>
         </ul>
     </div>
 </div>
+
+<script>
+function prefillSocialModal(platform, handle, url) {
+    document.getElementById("social_platform").value = platform;
+    document.getElementById("social_handle").value = handle;
+    document.getElementById("social_url").value = url;
+    document.getElementById("addSocialModal").style.display = "block";
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const taskItems = document.querySelectorAll(".wb-task-item");
+    
+    // Load saved checklist state
+    taskItems.forEach(item => {
+        const taskId = item.getAttribute("data-task-id");
+        const checkbox = item.querySelector(".wb-checkbox");
+        const isCompleted = localStorage.getItem("wb_task_" + taskId) === "true";
+        
+        if (isCompleted) {
+            item.classList.add("completed");
+            checkbox.innerHTML = "✓";
+        }
+        
+        item.addEventListener("click", function() {
+            const currentlyCompleted = item.classList.toggle("completed");
+            if (currentlyCompleted) {
+                checkbox.innerHTML = "✓";
+                localStorage.setItem("wb_task_" + taskId, "true");
+            } else {
+                checkbox.innerHTML = "";
+                localStorage.setItem("wb_task_" + taskId, "false");
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

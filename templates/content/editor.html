@@ -11,7 +11,7 @@
             <p style="color: var(--text-muted);">Craft your post, hook, script, and visual framing.</p>
         </div>
         <div>
-            <a href="{% url 'content:list' %}" class="btn" style="background: var(--bg-hover);">Cancel</a>
+            <a href="{% url 'content:list' %}" class="btn btn-secondary">Cancel</a>
             <button type="submit" class="btn">Save & Snapshot Version</button>
         </div>
     </div>
@@ -40,9 +40,71 @@
             </div>
 
             <div class="form-group">
-                <label>🎬 Script (For Videos/Reels/Shorts)</label>
-                <textarea name="script" class="form-control" rows="4" placeholder="[00:00] Intro visual... [00:15] Core lesson...">{{ item.script|default:'' }}</textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                    <label style="margin: 0;">🎬 Script (For Videos/Reels/Shorts)</label>
+                    <button type="button" onclick="document.getElementById('scriptGenBox').style.display='block';" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.2rem 0.5rem;">
+                        ⚡ AI Script Generator (Malayalam / English)
+                    </button>
+                </div>
+                <textarea id="scriptInput" name="script" class="form-control" rows="5" placeholder="[00:00] Intro visual... [00:15] Core lesson...">{{ item.script|default:'' }}</textarea>
             </div>
+
+            <!-- AI Script Generator Box -->
+            <div id="scriptGenBox" style="display: none; background: var(--bg-card); padding: 1rem; border-radius: 12px; border: 2px dashed var(--accent-purple); margin-bottom: 1.25rem;">
+                <h4 style="color: var(--accent-purple); margin-bottom: 0.5rem;">🎬 Bilingual AI Script Generator</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div>
+                        <label style="font-size: 0.85rem;">Select Language</label>
+                        <select id="scriptLang" class="form-control" style="font-size: 0.9rem;">
+                            <option value="ENGLISH">🇬🇧 English</option>
+                            <option value="MALAYALAM">🌴 Malayalam (മലയാളം Script)</option>
+                            <option value="MANGLISH">🗣️ Manglish (Malayalam in English)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem;">Target Platform</label>
+                        <select id="scriptPlatform" class="form-control" style="font-size: 0.9rem;">
+                            <option value="INSTAGRAM_REEL">Instagram Reel (30-60s)</option>
+                            <option value="YOUTUBE_SHORT">YouTube Short (60s)</option>
+                            <option value="YOUTUBE">YouTube Video (Long-form)</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" onclick="generateAIScript()" class="btn" style="width: 100%; font-size: 0.95rem;">
+                    ✨ Generate Script & Insert
+                </button>
+            </div>
+
+            <script>
+            function generateAIScript() {
+                const topic = document.querySelector('input[name="title"]').value || 'Computational AI & BioTech Workflows';
+                const lang = document.getElementById('scriptLang').value;
+                const platform = document.getElementById('scriptPlatform').value;
+
+                fetch("{% url 'ai_agents:generate_script' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: new URLSearchParams({
+                        topic: topic,
+                        language: lang,
+                        platform: platform,
+                        duration_seconds: 60,
+                        item_id: "{{ item.id|default:'' }}"
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('scriptInput').value = data.result.script + "\n\n" + data.result.visual_instructions;
+                        alert("Script successfully generated in " + lang + " and inserted!");
+                        document.getElementById('scriptGenBox').style.display = 'none';
+                    }
+                });
+            }
+            </script>
         </div>
 
         <!-- Sidebar Options -->

@@ -5,12 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Personal Brand OS{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Kalam:wght@400;700&family=Patrick+Hand&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("brand_os_theme");
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const theme = savedTheme ? savedTheme : (prefersDark ? "dark" : "light");
+            document.documentElement.setAttribute("data-theme", theme);
+        })();
+    </script>
 </head>
 <body>
     <header class="navbar">
         <div class="brand-title">⚡ Personal Brand OS</div>
         <div class="nav-links">
+            <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Whiteboard / Chalkboard Mode">
+                <span id="themeToggleIcon">🖍️</span>
+                <span id="themeToggleLabel">Chalkboard</span>
+            </button>
             {% if user.is_authenticated %}
                 <span>Logged in as <strong>{{ user.username }}</strong></span>
                 <a href="{% url 'accounts:logout' %}">Logout</a>
@@ -26,14 +41,15 @@
         <aside class="sidebar">
             <ul class="sidebar-menu">
                 <li><a href="{% url 'dashboard:index' %}">📊 Dashboard</a></li>
+                <li><a href="{% url 'public_portfolio' %}" target="_blank">🌐 Public Portfolio</a></li>
                 <li><a href="{% url 'brand:profile' %}">👤 Brand Strategy</a></li>
                 <li><a href="{% url 'content:list' %}">📝 Content Bank</a></li>
                 <li><a href="{% url 'content:ideas' %}">💡 Ideas Bank</a></li>
                 <li><a href="{% url 'content:pillars' %}">🎯 Content Pillars</a></li>
                 <li><a href="{% url 'calendar:index' %}">📅 Calendar</a></li>
                 <li><a href="{% url 'projects:list' %}">🚀 Projects Hub</a></li>
-                <li><a href="#" style="opacity: 0.5;">🤖 AI Studio (Phase 3)</a></li>
-                <li><a href="#" style="opacity: 0.5;">🌐 Social (Phase 4)</a></li>
+                <li><a href="{% url 'research:list' %}">📚 Knowledge Base</a></li>
+                <li><a href="{% url 'ai_agents:chat' %}">🤖 AI Studio & Copilot</a></li>
             </ul>
         </aside>
         {% endif %}
@@ -43,5 +59,131 @@
             {% endblock %}
         </main>
     </div>
+
+    <!-- Persistent Floating AI Brand Assistant Chatbot Widget -->
+    {% if user.is_authenticated %}
+    <div id="floatingChatContainer" style="position: fixed; bottom: 25px; right: 25px; z-index: 9999;">
+        <!-- Chat Trigger Button -->
+        <button id="floatingChatToggleBtn" class="btn" style="border-radius: 30px; padding: 0.6rem 1.2rem; font-size: 1rem; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 0.5rem;">
+            Brand AI Copilot
+        </button>
+
+        <!-- Pop-up Chat Drawer Window -->
+        <div id="floatingChatDrawer" style="display: none; position: absolute; bottom: 60px; right: 0; width: 380px; height: 500px; background: var(--bg-card); border-radius: 16px; border: 2px solid var(--marker-blue-border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); flex-direction: column; overflow: hidden;">
+            <!-- Drawer Header -->
+            <div style="background: var(--marker-blue); color: #ffffff; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="font-family: var(--marker-font); font-size: 1.15rem;">Brand AI Assistant</strong>
+                <button id="floatingChatCloseBtn" type="button" style="background: transparent; border: none; color: #ffffff; font-size: 1.3rem; cursor: pointer;">✕</button>
+            </div>
+
+            <!-- Messages Box -->
+            <div id="floatingChatMessages" style="flex: 1; padding: 0.85rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+                <div style="background: var(--marker-blue-light); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color);">
+                    <strong style="color: var(--marker-blue);">Copilot:</strong>
+                    <p style="margin-top: 0.2rem; line-height: 1.4;">Ask me for Reel scripts in Malayalam, post hooks, or brand voice feedback!</p>
+                </div>
+            </div>
+
+            <!-- Input Box -->
+            <div style="padding: 0.75rem; border-top: 1.5px dashed var(--border-color); background: var(--bg-card);">
+                <form id="floatingChatForm" style="display: flex; gap: 0.4rem;">
+                    <input type="text" id="floatingChatInput" class="form-control" placeholder="Ask AI Copilot..." style="margin: 0; font-size: 0.9rem;" required>
+                    <button type="submit" class="btn" style="padding: 0.35rem 0.8rem; font-size: 0.9rem;">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleBtn = document.getElementById("floatingChatToggleBtn");
+        const closeBtn = document.getElementById("floatingChatCloseBtn");
+        const drawer = document.getElementById("floatingChatDrawer");
+
+        if (toggleBtn && drawer) {
+            toggleBtn.addEventListener("click", () => {
+                drawer.style.display = drawer.style.display === "none" ? "flex" : "none";
+            });
+            closeBtn.addEventListener("click", () => {
+                drawer.style.display = "none";
+            });
+        }
+
+        const form = document.getElementById("floatingChatForm");
+        if (form) {
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+                const input = document.getElementById("floatingChatInput");
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                const msgWindow = document.getElementById("floatingChatMessages");
+                const uDiv = document.createElement("div");
+                uDiv.style.cssText = "align-self: flex-end; background: var(--accent-purple); color: #fff; padding: 0.6rem 0.8rem; border-radius: 8px; max-width: 85%; font-size: 0.9rem;";
+                uDiv.innerText = msg;
+                msgWindow.appendChild(uDiv);
+
+                input.value = "";
+                msgWindow.scrollTop = msgWindow.scrollHeight;
+
+                function autoLinkify(text) {
+                    if (text.includes('<a href=')) return text;
+                    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+                    return text.replace(urlRegex, function(url) {
+                        return '<a href="' + url + '" target="_blank" style="color: var(--accent-purple); font-weight: 600; text-decoration: underline;">' + url + '</a>';
+                    });
+                }
+
+                fetch("{% url 'ai_agents:api_chat' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ""
+                    },
+                    body: new URLSearchParams({ message: msg })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    const bDiv = document.createElement("div");
+                    bDiv.style.cssText = "background: var(--marker-blue-light); padding: 0.65rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); max-width: 85%; font-size: 0.9rem;";
+                    bDiv.innerHTML = data.success ? "<strong style='color: var(--marker-blue);'>Copilot:</strong><p style='margin-top: 0.2rem; white-space: pre-wrap;'>" + autoLinkify(data.reply) + "</p>" : "<span style='color:red;'>Failed to get response</span>";
+                    msgWindow.appendChild(bDiv);
+                    msgWindow.scrollTop = msgWindow.scrollHeight;
+                });
+            });
+        }
+    });
+    </script>
+    {% endif %}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById("themeToggleBtn");
+            const toggleIcon = document.getElementById("themeToggleIcon");
+            const toggleLabel = document.getElementById("themeToggleLabel");
+
+            function updateUI(theme) {
+                document.documentElement.setAttribute("data-theme", theme);
+                document.body.setAttribute("data-theme", theme);
+                if (theme === "dark") {
+                    toggleIcon.textContent = "✏️";
+                    toggleLabel.textContent = "Whiteboard";
+                } else {
+                    toggleIcon.textContent = "🖍️";
+                    toggleLabel.textContent = "Chalkboard";
+                }
+            }
+
+            const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+            updateUI(currentTheme);
+
+            toggleBtn.addEventListener("click", function() {
+                const activeTheme = document.documentElement.getAttribute("data-theme");
+                const nextTheme = activeTheme === "dark" ? "light" : "dark";
+                localStorage.setItem("brand_os_theme", nextTheme);
+                updateUI(nextTheme);
+            });
+        });
+    </script>
 </body>
 </html>

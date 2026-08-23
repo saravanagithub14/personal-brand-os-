@@ -138,6 +138,13 @@ CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=env("REDIS_URL"))
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+
+# LinkedIn OAuth 2.0 Settings
+LINKEDIN_CLIENT_ID = env("LINKEDIN_CLIENT_ID", default="")
+LINKEDIN_CLIENT_SECRET = env("LINKEDIN_CLIENT_SECRET", default="")
+LINKEDIN_REDIRECT_URI = env("LINKEDIN_REDIRECT_URI", default="http://localhost:8000/auth/linkedin/callback/")
+LINKEDIN_OAUTH_SCOPES = ["openid", "profile", "email", "w_member_social"]
+
 CELERY_TIMEZONE = TIME_ZONE
 
 LOGIN_URL = "/accounts/login/"

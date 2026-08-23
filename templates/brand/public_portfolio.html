@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile.name|default:portfolio_user.username }} - Public Portfolio | Personal Brand OS{% endblock %}
+
+{% block content %}
+<div class="card" style="background: #ffffff; border: 2.5px solid var(--marker-blue-border); padding: 2rem; margin-bottom: 1.5rem; border-radius: 14px; box-shadow: 5px 5px 0px rgba(37, 99, 235, 0.15);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span style="background: var(--marker-blue-light); color: var(--marker-blue); font-family: var(--marker-font); font-size: 1.1rem; padding: 0.2rem 0.75rem; border-radius: 20px; font-weight: 700; border: 1.5px solid var(--marker-blue-border);">Public Brand Portfolio</span>
+            <h1 style="font-size: 2.8rem; margin-top: 0.5rem; margin-bottom: 0.25rem; font-weight: 700; color: var(--marker-blue); font-family: var(--marker-font);">{{ profile.name|default:portfolio_user.username }}</h1>
+            <p style="font-size: 1.4rem; color: var(--marker-blue-dark); font-weight: 700; font-family: var(--marker-font);">{{ profile.professional_title|default:"Creator & Engineer" }}</p>
+            {% if profile.niche %}
+                <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.25rem;">Niche: <strong style="color: var(--marker-blue); font-family: var(--marker-font); font-size: 1.2rem;">{{ profile.niche }}</strong></p>
+            {% endif %}
+        </div>
+        {% if user.is_authenticated and user == portfolio_user %}
+            <a href="{% url 'brand:profile' %}" class="btn btn-secondary">✏️ Edit Brand Profile</a>
+        {% endif %}
+    </div>
+
+    {% if profile.short_bio %}
+        <p style="margin-top: 1rem; color: #334155; font-size: 1.1rem; line-height: 1.6; max-width: 800px;">
+            {{ profile.short_bio }}
+        </p>
+    {% endif %}
+
+    {% if profile.positioning_statement %}
+        <div style="margin-top: 1.2rem; padding: 1rem 1.25rem; background: var(--marker-blue-light); border-left: 4px solid var(--marker-blue-border); border-radius: 0 8px 8px 0;">
+            <p style="font-size: 1.2rem; font-family: var(--marker-font); color: var(--marker-blue-dark); margin: 0; font-weight: 700;">
+                "{{ profile.positioning_statement }}"
+            </p>
+        </div>
+    {% endif %}
+
+    <!-- External Social & Portfolio Links -->
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
+        {% if profile.portfolio_url %}
+            <a href="{{ profile.portfolio_url }}" target="_blank" class="btn" style="font-size: 1.1rem; padding: 0.35rem 0.9rem;">🌐 Website / Portfolio</a>
+        {% endif %}
+
+        {% if social_accounts %}
+            {% for acc in social_accounts %}
+                <a href="{{ acc.profile_url|default:'#' }}" target="_blank" class="btn btn-secondary" style="font-size: 1.1rem; padding: 0.35rem 0.9rem; display: inline-flex; align-items: center;">
+                    {% include "social/includes/platform_logo.html" with platform=acc.platform %}
+                    {{ acc.handle }} {% if acc.followers_count %}({{ acc.followers_count }} followers){% endif %}
+                </a>
+            {% endfor %}
+        {% else %}
+            {% if profile.github_url %}
+                <a href="{{ profile.github_url }}" target="_blank" class="btn btn-secondary" style="font-size: 1.1rem; padding: 0.35rem 0.9rem;">💻 GitHub</a>
+            {% endif %}
+            {% if profile.linkedin_url %}
+                <a href="{{ profile.linkedin_url }}" target="_blank" class="btn btn-secondary" style="font-size: 1.1rem; padding: 0.35rem 0.9rem;">💼 LinkedIn</a>
+            {% endif %}
+            {% if profile.twitter_url %}
+                <a href="{{ profile.twitter_url }}" target="_blank" class="btn btn-secondary" style="font-size: 1.1rem; padding: 0.35rem 0.9rem;">🐦 Twitter / X</a>
+            {% endif %}
+            {% if profile.youtube_url %}
+                <a href="{{ profile.youtube_url }}" target="_blank" class="btn btn-secondary" style="font-size: 1.1rem; padding: 0.35rem 0.9rem;">▶️ YouTube</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid-3" style="margin-bottom: 1.5rem;">
+    <!-- Expertise & Skills Sidebar -->
+    <div class="card" style="border-top: 4px solid var(--marker-blue-border);">
+        <h3 style="margin-bottom: 1rem; color: var(--marker-blue);">🎯 Core Expertise & Skills</h3>
+        {% if profile.expertise %}
+            <div style="margin-bottom: 1rem;">
+                <h4 style="font-size: 1.15rem; font-family: var(--marker-font); color: var(--text-muted); margin-bottom: 0.25rem;">Expertise</h4>
+                <p style="font-size: 1rem; color: var(--text-main);">{{ profile.expertise }}</p>
+            </div>
+        {% endif %}
+
+        {% if profile.skills %}
+            <div>
+                <h4 style="font-size: 1.15rem; font-family: var(--marker-font); color: var(--text-muted); margin-bottom: 0.25rem;">Skills & Technologies</h4>
+                <p style="font-size: 1rem; color: var(--text-main);">{{ profile.skills }}</p>
+            </div>
+        {% endif %}
+
+        {% if not profile.expertise and not profile.skills %}
+            <p style="color: var(--text-muted); font-size: 0.95rem; font-family: var(--marker-font);">No specific skills listed yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Featured Projects Showcase -->
+    <div class="card" style="grid-column: span 2; border-top: 4px solid #059669;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="color: #059669;">🚀 Projects Portfolio Showcase ({{ projects.count }})</h3>
+        </div>
+
+        {% if projects %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for proj in projects %}
+                    <div style="background: #f8fafc; padding: 1.25rem; border-radius: 10px; border: 2px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+                            <h4 style="font-size: 1.4rem; color: var(--marker-blue); font-family: var(--marker-font); font-weight: 700;">{{ proj.title }}</h4>
+                            <div style="display: flex; gap: 0.5rem;">
+                                {% if proj.github_url %}
+                                    <a href="{{ proj.github_url }}" target="_blank" class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.2rem 0.5rem;">GitHub</a>
+                                {% endif %}
+                                {% if proj.demo_url %}
+                                    <a href="{{ proj.demo_url }}" target="_blank" class="btn" style="font-size: 0.9rem; padding: 0.2rem 0.5rem;">Live Demo →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if proj.technologies %}
+                            <div style="margin-top: 0.35rem;">
+                                <span style="font-size: 0.9rem; background: var(--marker-blue-light); color: var(--marker-blue); padding: 0.2rem 0.5rem; border-radius: 6px; font-family: var(--marker-font); font-weight: 700; border: 1px solid var(--border-color);">
+                                    {{ proj.technologies }}
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        {% if proj.description %}
+                            <p style="color: var(--text-main); margin-top: 0.6rem; font-size: 0.95rem; line-height: 1.5;">
+                                {{ proj.description }}
+                            </p>
+                        {% endif %}
+
+                        {% if proj.solution %}
+                            <div style="margin-top: 0.6rem; background: #ffffff; padding: 0.65rem; border-radius: 8px; font-size: 0.9rem; border-left: 3px solid #059669; border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+                                <strong style="color: #059669; font-family: var(--marker-font); font-size: 1.1rem;">Solution & Architecture:</strong> {{ proj.solution }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted); padding: 1.5rem 0; text-align: center; font-family: var(--marker-font); font-size: 1.2rem;">No registered public projects yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Published Content Showcase -->
+<div class="card" style="border-top: 4px solid #7c3aed;">
+    <h3 style="margin-bottom: 1rem; color: #7c3aed;">📝 Published Articles & Content Portfolio ({{ published_content.count }})</h3>
+    {% if published_content %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            {% for item in published_content %}
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; border: 2px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 0.95rem; font-family: var(--marker-font); background: #f3e8ff; color: #7c3aed; padding: 0.15rem 0.5rem; border-radius: 6px; font-weight: 700; border: 1px solid #d8b4fe;">
+                            {{ item.get_platform_display }}
+                        </span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.published_at|date:"M d, Y"|default:item.updated_at|date:"M d, Y" }}</span>
+                    </div>
+                    <h4 style="font-size: 1.25rem; font-family: var(--marker-font); color: var(--text-main); margin-bottom: 0.4rem;">{{ item.title }}</h4>
+                    {% if item.hook %}
+                        <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.4;">{{ item.hook|truncatewords:20 }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: var(--text-muted); text-align: center; padding: 1.5rem 0; font-family: var(--marker-font); font-size: 1.2rem;">No published content items available yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
