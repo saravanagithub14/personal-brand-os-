@@ -221,4 +221,53 @@ class GenerateCampaignImagesView(LoginRequiredMixin, View):
         })
 
 
+class TopicCampaignUpdateDraftView(LoginRequiredMixin, View):
+    """API endpoint to save edited Medium blog, Reel script/caption, or LinkedIn post on the go."""
 
+    def post(self, request, campaign_id):
+        import json
+        from .models import TopicResearchCampaign
+        from apps.content.models import ContentItem
+
+        campaign = get_object_or_404(TopicResearchCampaign, id=campaign_id, user=request.user)
+
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+        except Exception:
+            body = request.POST
+
+        field = body.get("field", "").strip()
+        value = body.get("value", "").strip()
+
+        updated_fields = []
+        if field == "medium_blog" or "medium_blog" in body:
+            val = value if field == "medium_blog" else body["medium_blog"]
+            campaign.medium_blog = val
+            updated_fields.append("medium_blog")
+            ContentItem.objects.filter(user=request.user, title__icontains=campaign.topic, platform="MEDIUM").update(body=val)
+
+        if field == "insta_reel_script" or "insta_reel_script" in body:
+            val = value if field == "insta_reel_script" else body["insta_reel_script"]
+            campaign.insta_reel_script = val
+            updated_fields.append("insta_reel_script")
+
+        if field == "insta_reel_caption" or "insta_reel_caption" in body:
+            val = value if field == "insta_reel_caption" else body["insta_reel_caption"]
+            campaign.insta_reel_caption = val
+            updated_fields.append("insta_reel_caption")
+
+        if field in ("insta_reel_script", "insta_reel_caption") or "insta_reel_script" in body or "insta_reel_caption" in body:
+            combined = f"{campaign.insta_reel_script}\n\nCAPTION & HASHTAGS:\n{campaign.insta_reel_caption}"
+            ContentItem.objects.filter(user=request.user, title__icontains=campaign.topic, platform="INSTAGRAM").update(body=combined)
+
+        if field == "linkedin_post" or "linkedin_post" in body:
+            val = value if field == "linkedin_post" else body["linkedin_post"]
+            campaign.linkedin_post = val
+            updated_fields.append("linkedin_post")
+            ContentItem.objects.filter(user=request.user, title__icontains=campaign.topic, platform="LINKEDIN").update(body=val)
+
+        if updated_fields:
+            campaign.save()
+            return JsonResponse({"success": True, "updated": updated_fields, "message": "Draft saved successfully!"})
+
+        return JsonResponse({"success": False, "error": "No valid draft fields provided."})

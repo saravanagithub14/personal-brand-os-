@@ -10,6 +10,7 @@ from .views import (
     TopicCampaignDetailView,
     PublishMediumDraftView,
     GenerateCampaignImagesView,
+    TopicCampaignUpdateDraftView,
 )
 
 app_name = "ai_agents"
@@ -25,5 +26,6 @@ urlpatterns = [
     path("campaigns/<int:campaign_id>/", TopicCampaignDetailView.as_view(), name="campaign_detail"),
     path("campaigns/<int:campaign_id>/publish-medium/", PublishMediumDraftView.as_view(), name="publish_medium_draft"),
     path("campaigns/<int:campaign_id>/generate-images/", GenerateCampaignImagesView.as_view(), name="generate_campaign_images"),
+    path("campaigns/<int:campaign_id>/update-draft/", TopicCampaignUpdateDraftView.as_view(), name="update_campaign_draft"),
 ]
 

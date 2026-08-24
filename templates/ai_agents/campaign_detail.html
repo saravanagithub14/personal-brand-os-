@@ -875,7 +875,39 @@
   }
   .link-chip:hover { background: rgba(59,130,246,0.15); }
   .link-chip-icon { font-size: 1.1rem; flex-shrink: 0; }
-  .link-chip-text { font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn-save-draft {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .btn-save-draft:hover {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: #34d399;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  [contenteditable="true"] {
+    outline: none;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    cursor: text;
+  }
+  [contenteditable="true"]:hover {
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3);
+  }
+  [contenteditable="true"]:focus {
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.55);
+  }
 
   /* Responsive */
   @media (max-width: 640px) {
@@ -891,6 +923,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
 <div style="max-width: 1100px; margin: 0 auto; padding: 20px;">
+  {% csrf_token %}
 
   <!-- Hero Header -->
   <div class="campaign-hero">
@@ -961,6 +994,7 @@
           <a href="{{ campaign.medium_link }}" target="_blank" class="btn-open-medium" id="btn-live-medium">View Live →</a>
           {% endif %}
           <button class="btn-gen-images" id="btn-generate-images" onclick="generateBlogImages(this)" title="Generate high-resolution AI illustrations for all image prompts in this blog">🎨 Generate AI Images</button>
+          <button class="btn-save-draft" id="save-medium-btn" onclick="saveMediumChanges(this)" title="Save edits to Medium blog story">💾 Save Story</button>
           <button class="btn-open-medium" onclick="openMediumStory(this)" title="Copies the clean formatted story and opens Medium's editor in a new tab">🚀 Open in Medium</button>
         </div>
       </div>
@@ -1008,8 +1042,8 @@
             </div>
           </div>
 
-          <!-- Medium Story Rendered Markdown -->
-          <div class="blog-output" id="medium-rendered"></div>
+          <!-- Medium Story Rendered Markdown (Live Editable) -->
+          <div class="blog-output" id="medium-rendered" contenteditable="true" spellcheck="false" title="Click anywhere to edit this story on the go"></div>
 
           <!-- Story Footer & Tags -->
           <div class="medium-story-footer">
@@ -1064,6 +1098,7 @@
         <div class="panel-actions">
           <span class="model-badge" style="background:rgba(236,72,153,0.15); color:#f472b6; border:1px solid rgba(236,72,153,0.3);">⚡ Deep Technical</span>
           <span class="model-badge" style="background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3);">🎯 Systems & Architecture</span>
+          <button class="btn-save-draft" id="save-reel-btn" onclick="saveReelChanges(this)" title="Save edits to Reel script and caption">💾 Save Script</button>
           <button class="btn-copy" onclick="copyCleanElement('reel-rendered', this)">📋 Copy Script</button>
           {% if campaign.insta_reel_caption %}
           <button class="btn-copy" onclick="copyCleanElement('caption-content', this)">📸 Copy Caption</button>
@@ -1071,11 +1106,11 @@
         </div>
       </div>
       <div class="reel-output">
-        <div class="reel-teleprompter-card" id="reel-rendered"></div>
+        <div class="reel-teleprompter-card" id="reel-rendered" contenteditable="true" spellcheck="false" title="Click anywhere to edit script on the go"></div>
         {% if campaign.insta_reel_caption %}
         <div class="caption-section">
           <div class="caption-label">📸 Instagram Post Caption & Hashtags</div>
-          <div class="caption-text" id="caption-content">{{ campaign.insta_reel_caption }}</div>
+          <div class="caption-text" id="caption-content" contenteditable="true" spellcheck="false" title="Click to edit caption and hashtags">{{ campaign.insta_reel_caption }}</div>
         </div>
         {% endif %}
       </div>
@@ -1093,6 +1128,7 @@
         </div>
         <div class="panel-actions">
           <a href="{% url 'content:list' %}" style="font-size:0.78rem; color:#60a5fa; text-decoration:none; font-weight:600; white-space:nowrap;">Saved in Content Bank →</a>
+          <button class="btn-save-draft" id="save-li-btn" onclick="saveLinkedInChanges(this)" title="Save edits to LinkedIn post">💾 Save Post</button>
           <button class="btn-open-linkedin" onclick="openLinkedInPost(this)" title="Copies the post and opens LinkedIn's post creation modal in a new tab">🚀 Open in LinkedIn</button>
           <button class="btn-copy" onclick="copyCleanElement('li-post-text', this)">📋 Copy Post</button>
         </div>
@@ -1114,7 +1150,7 @@
           {% endif %}
         </div>
         {% endif %}
-        <div class="linkedin-post-preview" id="li-post-text">{{ campaign.linkedin_post }}</div>
+        <div class="linkedin-post-preview" id="li-post-text" contenteditable="true" spellcheck="false" title="Click to edit LinkedIn post on the go">{{ campaign.linkedin_post }}</div>
         <div class="linkedin-char-count">Character count: <span class="count" id="li-char-count">0</span></div>
       </div>
       <textarea id="li-raw" style="display:none;">{{ campaign.linkedin_post }}</textarea>
@@ -1423,7 +1459,111 @@
     localStorage.setItem('medium_image_view_mode', mode);
   }
 
-  // Medium Claps Interaction
+  // CSRF Token Helper
+  function getCsrfToken() {
+    const metaCsrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (metaCsrf && metaCsrf.value) return metaCsrf.value;
+    return '{{ csrf_token }}';
+  }
+
+  // Live Draft Save API
+  async function saveDraftField(field, value, btn) {
+    const origText = btn ? btn.innerHTML : null;
+    if (btn) btn.innerHTML = '💾 Saving...';
+
+    try {
+      const resp = await fetch("{% url 'ai_agents:update_campaign_draft' campaign.id %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCsrfToken(),
+        },
+        body: JSON.stringify({ field: field, value: value })
+      });
+      const data = await resp.json();
+      if (data.success) {
+        showToast('Draft Saved!', 'Your changes have been saved to this campaign and Content Bank.', '💾');
+        if (btn) {
+          btn.innerHTML = '✅ Saved!';
+          setTimeout(() => { btn.innerHTML = origText; }, 2500);
+        }
+        return true;
+      } else {
+        showToast('Save Error', data.error || 'Failed to save changes.', '⚠️');
+        if (btn) btn.innerHTML = origText;
+        return false;
+      }
+    } catch (e) {
+      console.error("Save Draft Error:", e);
+      showToast('Save Error', 'Network error while saving draft: ' + (e.message || ''), '⚠️');
+      if (btn) btn.innerHTML = origText;
+      return false;
+    }
+  }
+
+  // Save Medium Story Edits
+  async function saveMediumChanges(btn) {
+    const el = document.getElementById('medium-rendered');
+    const updatedText = el ? (el.innerText || el.textContent) : '';
+    if (document.getElementById('medium-raw')) {
+      document.getElementById('medium-raw').value = updatedText;
+    }
+    await saveDraftField('medium_blog', updatedText, btn);
+  }
+
+  // Save Reel Script & Caption Edits
+  async function saveReelChanges(btn) {
+    const scriptEl = document.getElementById('reel-rendered');
+    const captionEl = document.getElementById('caption-content');
+    const scriptText = scriptEl ? (scriptEl.innerText || scriptEl.textContent) : '';
+    const captionText = captionEl ? (captionEl.innerText || captionEl.textContent) : '';
+
+    if (scriptEl && document.getElementById('reel-raw')) {
+      document.getElementById('reel-raw').value = scriptText;
+    }
+
+    const origText = btn.innerHTML;
+    btn.innerHTML = '💾 Saving...';
+
+    try {
+      const resp = await fetch("{% url 'ai_agents:update_campaign_draft' campaign.id %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCsrfToken(),
+        },
+        body: JSON.stringify({
+          insta_reel_script: scriptText,
+          insta_reel_caption: captionText
+        })
+      });
+      const data = await resp.json();
+      if (data.success) {
+        showToast('Reel Draft Saved!', 'Script and caption have been updated.', '🎬');
+        btn.innerHTML = '✅ Saved!';
+        setTimeout(() => { btn.innerHTML = origText; }, 2500);
+      } else {
+        showToast('Save Error', data.error || 'Failed to save reel draft.', '⚠️');
+        btn.innerHTML = origText;
+      }
+    } catch (e) {
+      console.error("Save Reel Error:", e);
+      showToast('Save Error', 'Network error while saving reel: ' + (e.message || ''), '⚠️');
+      btn.innerHTML = origText;
+    }
+  }
+
+  // Save LinkedIn Post Edits
+  async function saveLinkedInChanges(btn) {
+    const postEl = document.getElementById('li-post-text');
+    const cleanText = postEl ? (postEl.innerText || postEl.textContent) : '';
+    if (document.getElementById('li-raw')) {
+      document.getElementById('li-raw').value = cleanText;
+    }
+    await saveDraftField('linkedin_post', cleanText, btn);
+  }
+
+  // Claps Interaction
   function toggleClap(btn) {
     const countEl = btn.querySelector('.clap-count');
     btn.classList.toggle('clapped');
@@ -1439,6 +1579,29 @@
     updateCharCount();
     const savedMode = localStorage.getItem('medium_image_view_mode') || 'images';
     setImageDisplayMode(savedMode);
+
+    // Live LinkedIn Character Counter on Input
+    const liPostEl = document.getElementById('li-post-text');
+    if (liPostEl) {
+      liPostEl.addEventListener('input', function() {
+        const len = this.innerText.length;
+        const countEl = document.getElementById('li-char-count');
+        if (countEl) countEl.textContent = len;
+        if (document.getElementById('li-raw')) {
+          document.getElementById('li-raw').value = this.innerText;
+        }
+      });
+    }
+
+    // Keep Medium raw updated on input
+    const mediumEl = document.getElementById('medium-rendered');
+    if (mediumEl) {
+      mediumEl.addEventListener('input', function() {
+        if (document.getElementById('medium-raw')) {
+          document.getElementById('medium-raw').value = this.innerText;
+        }
+      });
+    }
   });
 </script>
 {% endblock %}
