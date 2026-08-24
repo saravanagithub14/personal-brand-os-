@@ -42,3 +42,39 @@ class AgentExecutionLog(models.Model):
 
     def __str__(self):
         return f"{self.agent_name} ({self.model_used}) - {self.total_tokens} tokens"
+
+
+class TopicResearchCampaign(models.Model):
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("RESEARCHING", "Researching & Fact Checking"),
+        ("GENERATING_MEDIUM", "Drafting Medium Article"),
+        ("GENERATING_REEL", "Writing Instagram Reel Script"),
+        ("GENERATING_LINKEDIN", "Creating LinkedIn Post"),
+        ("COMPLETED", "Completed"),
+        ("FAILED", "Failed"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="research_campaigns")
+    topic = models.CharField(max_length=255)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="PENDING")
+    research_depth = models.CharField(max_length=20, default="DEEP", choices=[("QUICK", "Quick"), ("STANDARD", "Standard"), ("DEEP", "Deep")])
+
+    # Outputs
+    research_notes = models.TextField(blank=True, default="")
+    fact_check_summary = models.TextField(blank=True, default="")
+    medium_blog = models.TextField(blank=True, default="")
+    insta_reel_script = models.TextField(blank=True, default="")
+    insta_reel_caption = models.TextField(blank=True, default="")
+    linkedin_post = models.TextField(blank=True, default="")
+
+    medium_link = models.URLField(blank=True, default="", help_text="Link to published Medium blog post")
+    insta_reel_link = models.URLField(blank=True, default="", help_text="Link to published Instagram Reel")
+
+    error_message = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Campaign: {self.topic} ({self.status})"
+

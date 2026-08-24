@@ -1,0 +1,1444 @@
+{% extends "base.html" %}
+
+{% block title %}{{ campaign.topic }} — Campaign Suite — Personal Brand OS{% endblock %}
+
+{% block content %}
+<style>
+  .campaign-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%);
+    border-radius: 16px;
+    padding: 32px 36px 28px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .campaign-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .campaign-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-back {
+    font-size: 0.82rem;
+    color: #818cf8;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 14px;
+    transition: color 0.2s;
+  }
+  .hero-back:hover { color: #a5b4fc; }
+  .hero-topic {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0 0 10px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .status-pill.completed { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .status-pill.failed { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .status-pill.pending { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status-dot.pulse { animation: pulse-dot 1.5s infinite; }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .hero-date { font-size: 0.82rem; color: #64748b; }
+
+  /* Pipeline progress bar */
+  .pipeline-bar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pipe-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 100px;
+    position: relative;
+  }
+  .pipe-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: calc(50% + 22px);
+    right: calc(-50% + 22px);
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    opacity: 0.4;
+  }
+  .pipe-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: rgba(99,102,241,0.2);
+    border: 2px solid rgba(99,102,241,0.4);
+    color: #818cf8;
+  }
+  .pipe-icon.done {
+    background: rgba(34,197,94,0.15);
+    border-color: rgba(34,197,94,0.5);
+    color: #4ade80;
+  }
+  .pipe-label { font-size: 0.74rem; color: #94a3b8; font-weight: 600; text-align: center; line-height: 1.3; }
+
+  /* Tabs */
+  .tab-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    background: rgba(15,23,42,0.5);
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 12px;
+    padding: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 11px 18px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    white-space: nowrap;
+    transition: all 0.2s;
+    min-width: 120px;
+  }
+  .tab-btn:hover { background: rgba(99,102,241,0.1); color: #a5b4fc; }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+  }
+  .tab-badge {
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.18);
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  /* Stage panels */
+  .stage-panel {
+    display: none;
+    animation: fadeSlideIn 0.35s ease;
+  }
+  .stage-panel.active { display: block; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-card {
+    background: var(--card-bg, #0f172a);
+    border: 1px solid rgba(99,102,241,0.18);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: rgba(99,102,241,0.07);
+    border-bottom: 1px solid rgba(99,102,241,0.15);
+  }
+  .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+  .panel-title-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .icon-medium { background: rgba(16,185,129,0.2); }
+  .icon-reel { background: rgba(236,72,153,0.2); }
+  .icon-linkedin { background: rgba(59,130,246,0.2); }
+  .panel-actions { display: flex; gap: 8px; align-items: center; }
+  .model-badge {
+    font-size: 0.72rem;
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+    border: 1px solid rgba(99,102,241,0.3);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .btn-copy {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 7px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-copy:hover { background: rgba(99,102,241,0.3); color: #a5b4fc; }
+  .btn-copy.copied { background: rgba(34,197,94,0.15); color: #4ade80; border-color: rgba(34,197,94,0.3); }
+
+  .btn-open-medium {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(16,185,129,0.35);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-open-medium:hover {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(16,185,129,0.45);
+  }
+
+  .btn-open-linkedin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #0a66c2 0%, #0077b5 100%);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(10, 102, 194, 0.35);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-open-linkedin:hover {
+    background: linear-gradient(135deg, #0077b5 0%, #004182 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(10, 102, 194, 0.45);
+  }
+
+  .btn-gen-images {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(139,92,246,0.35);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-gen-images:hover {
+    background: linear-gradient(135deg, #a78bfa, #818cf8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(139,92,246,0.45);
+  }
+  .btn-gen-images:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .toast-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #0f172a;
+    border: 1px solid #10b981;
+    color: #f1f5f9;
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 99999;
+    animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: 0.88rem;
+    max-width: 420px;
+    line-height: 1.5;
+  }
+  .toast-notification.active { display: flex; }
+  @keyframes toastSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Medium 100% Scaled Story Canvas */
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap');
+
+  .medium-story-canvas {
+    background: #0b0f19;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 44px 36px 60px;
+    max-height: 800px;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .medium-story-canvas::-webkit-scrollbar { width: 6px; }
+  .medium-story-canvas::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+  .medium-story-canvas::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+  .medium-story-container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* Medium Top Publication Banner */
+  .medium-top-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.84rem;
+    color: #94a3b8;
+    margin-bottom: 24px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .medium-pub-icon {
+    font-size: 1rem;
+  }
+  .medium-pub-name {
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+  .medium-member-badge {
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(251, 191, 36, 0.1);
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+  }
+
+  /* Medium Author Header */
+  .medium-author-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .medium-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #6366f1);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .medium-author-details {
+    flex: 1;
+  }
+  .medium-author-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .medium-author-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+  .medium-follow-btn {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 2px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .medium-follow-btn:hover {
+    background: rgba(16, 185, 129, 0.25);
+    color: #6ee7b7;
+  }
+  .medium-story-meta-row {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Medium Engagement Bar */
+  .medium-engagement-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 18px 0 36px 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .medium-eng-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .medium-eng-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .medium-eng-btn:hover {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .medium-eng-btn.clapped {
+    color: #34d399;
+  }
+
+  /* Story Body (Authentic Medium Typography) */
+  .blog-output {
+    font-family: 'Source Serif 4', 'Lora', Georgia, Cambria, serif;
+    font-size: 1.22rem;
+    line-height: 1.82;
+    color: rgba(255, 255, 255, 0.86);
+    letter-spacing: -0.003em;
+    padding: 0;
+  }
+  .blog-output h1 {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 2.35rem;
+    color: #ffffff;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+    margin: 0 0 20px 0;
+  }
+  .blog-output h2 {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1.55rem;
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1.32;
+    letter-spacing: -0.02em;
+    margin: 46px 0 16px 0;
+  }
+  .blog-output h3 {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1.25rem;
+    color: #f1f5f9;
+    font-weight: 700;
+    margin: 32px 0 12px 0;
+  }
+  .blog-output p {
+    margin: 0 0 26px 0;
+    font-weight: 400;
+  }
+  .blog-output strong {
+    color: #ffffff;
+    font-weight: 700;
+  }
+  .blog-output em {
+    color: #cbd5e1;
+    font-style: italic;
+  }
+  .blog-output ul, .blog-output ol {
+    padding-left: 28px;
+    margin: 0 0 26px 0;
+  }
+  .blog-output li {
+    margin-bottom: 10px;
+  }
+  .blog-output hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 40px 0;
+    text-align: center;
+  }
+  .blog-output code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 0.88rem;
+    color: #34d399;
+  }
+  .blog-output pre {
+    background: #060911;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 32px 0;
+  }
+  .blog-output pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #cbd5e1;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .blog-output img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+    margin: 36px 0 12px 0;
+    display: block;
+    transition: transform 0.25s ease;
+  }
+  .blog-output img:hover {
+    transform: scale(1.01);
+  }
+  .blog-output blockquote {
+    border-left: 3px solid #10b981;
+    padding: 4px 0 4px 22px;
+    margin: 34px 0;
+    font-style: italic;
+    font-size: 1.3rem;
+    line-height: 1.65;
+    color: #e2e8f0;
+    background: transparent;
+    border-radius: 0;
+  }
+  .blog-output blockquote strong {
+    color: #34d399;
+    font-style: normal;
+  }
+
+  /* Medium Story Footer (Tags & Author Card) */
+  .medium-story-footer {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .medium-tag-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+  }
+  .medium-tag {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: default;
+  }
+  .medium-author-footer-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  .medium-footer-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #6366f1);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .medium-footer-details {
+    flex: 1;
+  }
+  .medium-footer-written {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .medium-footer-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+  }
+  .medium-footer-bio {
+    font-size: 0.84rem;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+
+  /* Image vs Prompt Mode Slider */
+  .view-mode-slider-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 3px 5px;
+    border-radius: 8px;
+  }
+  .slider-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-left: 4px;
+  }
+  .view-slider {
+    display: flex;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .slider-option {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .slider-option:hover {
+    color: #f1f5f9;
+  }
+  .slider-option.active {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  }
+
+  /* Slider Display Filtering */
+  .blog-output.mode-images blockquote {
+    display: none !important;
+  }
+  .blog-output.mode-prompts img {
+    display: none !important;
+  }
+  .blog-output.mode-prompts blockquote {
+    display: block !important;
+  }
+  .blog-output.mode-both img,
+  .blog-output.mode-both blockquote {
+    display: block !important;
+  }
+
+  /* Reel 30-Sec Teleprompter Deck */
+  .reel-output {
+    padding: 28px;
+    max-height: 700px;
+    overflow-y: auto;
+  }
+  .reel-output::-webkit-scrollbar { width: 6px; }
+  .reel-output::-webkit-scrollbar-thumb { background: rgba(236,72,153,0.3); border-radius: 3px; }
+  .reel-teleprompter-card {
+    background: #0d1220;
+    border: 1px solid rgba(236, 72, 153, 0.22);
+    border-radius: 12px;
+    padding: 26px 30px;
+    font-size: 1.02rem;
+    line-height: 1.9;
+    color: #f8fafc;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .reel-teleprompter-card p {
+    margin-bottom: 18px;
+  }
+  .reel-teleprompter-card strong {
+    color: #f472b6;
+    background: rgba(236, 72, 153, 0.14);
+    border: 1px solid rgba(236, 72, 153, 0.3);
+    padding: 3px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: 0.04em;
+  }
+  .reel-teleprompter-card ul {
+    padding-left: 22px;
+    margin: 10px 0 20px;
+  }
+  .reel-teleprompter-card li {
+    margin-bottom: 8px;
+    color: #e2e8f0;
+  }
+  .reel-teleprompter-card ol {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: hook-counter;
+    margin: 14px 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .reel-teleprompter-card ol li {
+    counter-increment: hook-counter;
+    background: rgba(236, 72, 153, 0.05);
+    border: 1px solid rgba(236, 72, 153, 0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.94rem;
+    line-height: 1.6;
+    color: #f1f5f9;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .reel-teleprompter-card ol li::before {
+    content: counter(hook-counter);
+    background: linear-gradient(135deg, #ec4899, #8b5cf6);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .caption-section {
+    border-top: 1px solid rgba(236,72,153,0.2);
+    padding-top: 22px;
+    margin-top: 24px;
+  }
+  .caption-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ec4899;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .caption-text {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: #f1f5f9;
+    white-space: pre-wrap;
+    background: rgba(236,72,153,0.06);
+    border: 1px solid rgba(236,72,153,0.2);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  /* LinkedIn output */
+  .linkedin-output {
+    padding: 28px;
+  }
+  .linkedin-post-preview {
+    background: rgba(59,130,246,0.05);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 12px;
+    padding: 22px;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: #e2e8f0;
+    white-space: pre-wrap;
+    font-family: inherit;
+  }
+  .linkedin-char-count {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-align: right;
+    margin-top: 8px;
+    font-weight: 500;
+  }
+  .linkedin-char-count .count { color: #60a5fa; font-weight: 700; }
+  .linkedin-links {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 20px;
+  }
+  .link-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 0.82rem; color: #60a5fa;
+    text-decoration: none;
+    transition: all 0.2s;
+    word-break: break-all;
+  }
+  .link-chip:hover { background: rgba(59,130,246,0.15); }
+  .link-chip-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .link-chip-text { font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .campaign-hero { padding: 20px; }
+    .hero-topic { font-size: 1.4rem; }
+    .tab-btn { font-size: 0.8rem; padding: 9px 12px; min-width: 90px; }
+    .linkedin-links { grid-template-columns: 1fr; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<div style="max-width: 1100px; margin: 0 auto; padding: 20px;">
+
+  <!-- Hero Header -->
+  <div class="campaign-hero">
+    <a href="{% url 'ai_agents:campaign_list' %}" class="hero-back">← Back to Campaigns</a>
+    <h1 class="hero-topic">{{ campaign.topic }}</h1>
+    <div class="hero-meta">
+      <span class="status-pill {% if campaign.status == 'COMPLETED' %}completed{% elif campaign.status == 'FAILED' %}failed{% else %}pending{% endif %}">
+        <span class="status-dot {% if campaign.status != 'COMPLETED' and campaign.status != 'FAILED' %}pulse{% endif %}"></span>
+        {{ campaign.get_status_display }}
+      </span>
+      <span class="hero-date">🕐 {{ campaign.created_at|date:"F d, Y · H:i" }}</span>
+    </div>
+  </div>
+
+  <!-- Pipeline Progress Bar -->
+  <div class="pipeline-bar">
+    <div class="pipe-step">
+      <div class="pipe-icon {% if campaign.medium_blog %}done{% endif %}">📝</div>
+      <span class="pipe-label">Medium<br>Article</span>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon {% if campaign.insta_reel_script %}done{% endif %}">🎬</div>
+      <span class="pipe-label">Instagram<br>Reel</span>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon {% if campaign.linkedin_post %}done{% endif %}">💼</div>
+      <span class="pipe-label">LinkedIn<br>Post</span>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('medium', this)" id="tab-medium">
+      📝 Medium Blog <span class="tab-badge">Stage 1</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('reel', this)" id="tab-reel">
+      🎬 Reel Script <span class="tab-badge">Stage 2</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('linkedin', this)" id="tab-linkedin">
+      💼 LinkedIn Post <span class="tab-badge">Stage 3</span>
+    </button>
+  </div>
+
+  <!-- Stage 1: Medium Blog -->
+  <div class="stage-panel active" id="panel-medium">
+    <div class="panel-card" style="padding:0; overflow:hidden;">
+      <div class="panel-header" style="border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px;">
+        <div class="panel-title">
+          <div class="panel-title-icon icon-medium">📝</div>
+          Medium Blog Article Draft
+        </div>
+        <div class="panel-actions">
+          <div class="view-mode-slider-container" title="Switch between viewing generated images or raw prompt text">
+            <span class="slider-label">Visuals:</span>
+            <div class="view-slider" id="image-view-slider">
+              <button type="button" class="slider-option active" onclick="setImageDisplayMode('images', this)" data-mode="images" title="Show generated illustrations">
+                🖼️ Images
+              </button>
+              <button type="button" class="slider-option" onclick="setImageDisplayMode('prompts', this)" data-mode="prompts" title="Show image prompt text blocks">
+                📝 Prompts
+              </button>
+              <button type="button" class="slider-option" onclick="setImageDisplayMode('both', this)" data-mode="both" title="Show both images and prompt descriptions">
+                ✨ Both
+              </button>
+            </div>
+          </div>
+          {% if campaign.medium_link %}
+          <a href="{{ campaign.medium_link }}" target="_blank" class="btn-open-medium" id="btn-live-medium">View Live →</a>
+          {% endif %}
+          <button class="btn-gen-images" id="btn-generate-images" onclick="generateBlogImages(this)" title="Generate high-resolution AI illustrations for all image prompts in this blog">🎨 Generate AI Images</button>
+          <button class="btn-open-medium" onclick="openMediumStory(this)" title="Copies the clean formatted story and opens Medium's editor in a new tab">🚀 Open in Medium</button>
+        </div>
+      </div>
+
+      <!-- 100% Scaled Medium Story View -->
+      <div class="medium-story-canvas">
+        <div class="medium-story-container">
+          
+          <!-- Publication Tag & Story Tier -->
+          <div class="medium-top-banner">
+            <span class="medium-pub-icon">⚡</span>
+            <span class="medium-pub-name">Personal Brand OS</span>
+            <span>·</span>
+            <span class="medium-member-badge">⭐ Member-only story</span>
+          </div>
+
+          <!-- Author Header Card -->
+          <div class="medium-author-header">
+            <div class="medium-avatar">
+              {{ request.user.username|slice:":1"|upper }}
+            </div>
+            <div class="medium-author-details">
+              <div class="medium-author-name-row">
+                <span class="medium-author-name">{% if user.brand_profile.name %}{{ user.brand_profile.name }}{% else %}{{ user.username }}{% endif %}</span>
+                <span class="medium-follow-btn">Follow</span>
+              </div>
+              <div class="medium-story-meta-row">
+                <span>6 min read</span>
+                <span>·</span>
+                <span>{{ campaign.created_at|date:"M d, Y" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Engagement Bar (Top) -->
+          <div class="medium-engagement-bar">
+            <div class="medium-eng-group">
+              <button type="button" class="medium-eng-btn" onclick="toggleClap(this)"><span class="clap-icon">👏</span> <span class="clap-count">1.4K</span></button>
+              <button type="button" class="medium-eng-btn">💬 <span>48</span></button>
+            </div>
+            <div class="medium-eng-group">
+              <button type="button" class="medium-eng-btn" title="Listen to audio version">🔊 Listen</button>
+              <button type="button" class="medium-eng-btn" onclick="openMediumStory(document.getElementById('btn-generate-images'))" title="Share story">↗ Share</button>
+              <button type="button" class="medium-eng-btn" title="Bookmark story">🔖</button>
+            </div>
+          </div>
+
+          <!-- Medium Story Rendered Markdown -->
+          <div class="blog-output" id="medium-rendered"></div>
+
+          <!-- Story Footer & Tags -->
+          <div class="medium-story-footer">
+            <div class="medium-tag-chips">
+              <span class="medium-tag">Artificial Intelligence</span>
+              <span class="medium-tag">Technology</span>
+              <span class="medium-tag">Software Engineering</span>
+              <span class="medium-tag">Personal Brand</span>
+            </div>
+
+            <!-- Engagement Bar (Bottom) -->
+            <div class="medium-engagement-bar" style="margin: 0 0 32px 0;">
+              <div class="medium-eng-group">
+                <button type="button" class="medium-eng-btn" onclick="toggleClap(this)"><span class="clap-icon">👏</span> <span class="clap-count">1.4K</span></button>
+                <button type="button" class="medium-eng-btn">💬 <span>48</span></button>
+              </div>
+              <div class="medium-eng-group">
+                <button type="button" class="medium-eng-btn" onclick="openMediumStory(document.getElementById('btn-generate-images'))">↗ Share</button>
+                <button type="button" class="medium-eng-btn">🔖</button>
+              </div>
+            </div>
+
+            <!-- Author Footer Bio Box -->
+            <div class="medium-author-footer-card">
+              <div class="medium-footer-avatar">
+                {{ request.user.username|slice:":1"|upper }}
+              </div>
+              <div class="medium-footer-details">
+                <div class="medium-footer-written">Written by</div>
+                <div class="medium-footer-name">{% if user.brand_profile.name %}{{ user.brand_profile.name }}{% else %}{{ user.username }}{% endif %}</div>
+                <div class="medium-footer-bio">{% if user.brand_profile.short_bio %}{{ user.brand_profile.short_bio }}{% else %}Writer, engineer, and creator publishing technical essays, architecture audits, and insights on Personal Brand OS.{% endif %}</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <textarea id="medium-raw" style="display:none;">{{ campaign.medium_blog }}</textarea>
+    </div>
+  </div>
+
+  <!-- Stage 2: Instagram Reel -->
+  <div class="stage-panel" id="panel-reel">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-icon icon-reel">🎬</div>
+          Malayalam Engineering Reel (Deep Technical Breakdown)
+        </div>
+        <div class="panel-actions">
+          <span class="model-badge" style="background:rgba(236,72,153,0.15); color:#f472b6; border:1px solid rgba(236,72,153,0.3);">⚡ Deep Technical</span>
+          <span class="model-badge" style="background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3);">🎯 Systems & Architecture</span>
+          <button class="btn-copy" onclick="copyCleanElement('reel-rendered', this)">📋 Copy Script</button>
+          {% if campaign.insta_reel_caption %}
+          <button class="btn-copy" onclick="copyCleanElement('caption-content', this)">📸 Copy Caption</button>
+          {% endif %}
+        </div>
+      </div>
+      <div class="reel-output">
+        <div class="reel-teleprompter-card" id="reel-rendered"></div>
+        {% if campaign.insta_reel_caption %}
+        <div class="caption-section">
+          <div class="caption-label">📸 Instagram Post Caption & Hashtags</div>
+          <div class="caption-text" id="caption-content">{{ campaign.insta_reel_caption }}</div>
+        </div>
+        {% endif %}
+      </div>
+      <textarea id="reel-raw" style="display:none;">{{ campaign.insta_reel_script }}</textarea>
+    </div>
+  </div>
+
+  <!-- Stage 3: LinkedIn Post -->
+  <div class="stage-panel" id="panel-linkedin">
+    <div class="panel-card">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-icon icon-linkedin">💼</div>
+          LinkedIn Cross-Promotion Post
+        </div>
+        <div class="panel-actions">
+          <a href="{% url 'content:list' %}" style="font-size:0.78rem; color:#60a5fa; text-decoration:none; font-weight:600; white-space:nowrap;">Saved in Content Bank →</a>
+          <button class="btn-open-linkedin" onclick="openLinkedInPost(this)" title="Copies the post and opens LinkedIn's post creation modal in a new tab">🚀 Open in LinkedIn</button>
+          <button class="btn-copy" onclick="copyCleanElement('li-post-text', this)">📋 Copy Post</button>
+        </div>
+      </div>
+      <div class="linkedin-output">
+        {% if campaign.medium_link or campaign.insta_reel_link %}
+        <div class="linkedin-links">
+          {% if campaign.medium_link %}
+          <a href="{{ campaign.medium_link }}" target="_blank" class="link-chip" id="li-medium-chip">
+            <span class="link-chip-icon">📝</span>
+            <span class="link-chip-text">{{ campaign.medium_link }}</span>
+          </a>
+          {% endif %}
+          {% if campaign.insta_reel_link %}
+          <a href="{{ campaign.insta_reel_link }}" target="_blank" class="link-chip">
+            <span class="link-chip-icon">🎬</span>
+            <span class="link-chip-text">{{ campaign.insta_reel_link }}</span>
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+        <div class="linkedin-post-preview" id="li-post-text">{{ campaign.linkedin_post }}</div>
+        <div class="linkedin-char-count">Character count: <span class="count" id="li-char-count">0</span></div>
+      </div>
+      <textarea id="li-raw" style="display:none;">{{ campaign.linkedin_post }}</textarea>
+    </div>
+  </div>
+
+</div>
+
+<!-- Floating Toast -->
+<div class="toast-notification" id="toast-medium">
+  <span style="font-size: 1.4rem;" id="toast-icon">✨</span>
+  <div>
+    <strong style="color: #34d399; display: block; margin-bottom: 2px;" id="toast-title">Article Copied to Clipboard!</strong>
+    <span id="toast-msg">Opening Medium story editor. Press <kbd style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px; font-family:inherit;">Ctrl + V</kbd> (or <kbd style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px; font-family:inherit;">Cmd + V</kbd>) in Medium to paste.</span>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.stage-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + tabId).classList.add('active');
+  }
+
+  // Utility to strip raw markdown symbols (asterisks, hashtags, blockquote markers)
+  function stripMarkdown(md) {
+    if (!md) return '';
+    let text = md;
+    text = text.replace(/(\*\*\*|___)(.*?)\1/g, '$2');
+    text = text.replace(/(\*\*|__)(.*?)\1/g, '$2');
+    text = text.replace(/(\*|_)(.*?)\1/g, '$2');
+    text = text.replace(/^#{1,6}\s+(.*)$/gm, '$1');
+    text = text.replace(/^>\s*/gm, '');
+    text = text.replace(/^(?:---|\*\*\*|___)\s*$/gm, '');
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');
+    text = text.replace(/`([^`]+)`/g, '$1');
+    text = text.replace(/\*/g, '');
+    return text.trim();
+  }
+
+  function showToast(title, msg, icon = '✨') {
+    const toast = document.getElementById('toast-medium');
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-msg').textContent = msg;
+    document.getElementById('toast-icon').textContent = icon;
+    if (toast) {
+      toast.classList.add('active');
+      setTimeout(() => { toast.classList.remove('active'); }, 6000);
+    }
+  }
+
+  // Generate AI Visuals for Blog Image Prompts
+  async function generateBlogImages(btn) {
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '🎨 Generating Visuals (DALL-E 3)...';
+    showToast('Generating Visuals...', 'Generating AI illustrations for your blog prompts. This takes 10-25 seconds.', '🎨');
+
+    try {
+      const resp = await fetch('{% url "ai_agents:generate_campaign_images" campaign.id %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        }
+      });
+      const data = await resp.json();
+
+      if (data.success && data.medium_blog) {
+        document.getElementById('medium-raw').value = data.medium_blog;
+        renderMarkdown();
+        showToast('Images Generated!', data.message || 'Illustrations generated and embedded into your blog!', '✨');
+        btn.innerHTML = '✅ Images Generated!';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '🎨 Regenerate Images';
+        }, 3000);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+        showToast('Notice', data.message || 'No new image prompts found or generation skipped.', '⚠️');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+      showToast('Error', 'Image generation request failed. Check server connection.', '❌');
+    }
+  }
+
+  // Get content matching active slider filter OR manual user cursor selection
+  function getSelectedOrVisibleContent() {
+    const blogEl = document.getElementById('medium-rendered');
+    const rawText = document.getElementById('medium-raw').value;
+    const currentMode = localStorage.getItem('medium_image_view_mode') || 'images';
+
+    // 1. Check if user highlighted specific text on screen
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && blogEl && blogEl.contains(selection.anchorNode)) {
+      const container = document.createElement('div');
+      for (let i = 0; i < selection.rangeCount; i++) {
+        container.appendChild(selection.getRangeAt(i).cloneContents());
+      }
+      return {
+        html: container.innerHTML,
+        text: stripMarkdown(selection.toString().trim()),
+        label: 'Highlighted Selection'
+      };
+    }
+
+    // 2. Clone rendered blog DOM and filter based on slider mode
+    if (blogEl) {
+      const clone = blogEl.cloneNode(true);
+
+      if (currentMode === 'images') {
+        // Strip prompt blockquotes
+        clone.querySelectorAll('blockquote').forEach(el => el.remove());
+      } else if (currentMode === 'prompts') {
+        // Strip image tags
+        clone.querySelectorAll('img').forEach(el => el.remove());
+      }
+      // 'both' keeps everything
+
+      const visibleHtml = clone.innerHTML;
+      let visibleText = clone.innerText || clone.textContent;
+      visibleText = stripMarkdown(visibleText);
+
+      let label = 'Full Post (with Images)';
+      if (currentMode === 'prompts') label = 'Prompts & Text';
+      if (currentMode === 'both') label = 'Images & Prompts';
+
+      return {
+        html: visibleHtml,
+        text: visibleText,
+        label: label
+      };
+    }
+
+    return {
+      html: '',
+      text: stripMarkdown(rawText),
+      label: 'Blog Text'
+    };
+  }
+
+  // Open Medium Write Page & Auto-Copy Exact Visible/Selected Content
+  async function openMediumStory(btn) {
+    const content = getSelectedOrVisibleContent();
+
+    // 1. Copy rich formatted text (and clean plain text fallback) to clipboard
+    try {
+      if (navigator.clipboard && window.ClipboardItem && content.html) {
+        const htmlBlob = new Blob([content.html], { type: 'text/html' });
+        const textBlob = new Blob([content.text], { type: 'text/plain' });
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': htmlBlob,
+            'text/plain': textBlob
+          })
+        ]);
+      } else {
+        await navigator.clipboard.writeText(content.text);
+      }
+    } catch (err) {
+      await navigator.clipboard.writeText(content.text);
+    }
+
+    // 2. Feedback on button
+    const orig = btn.innerHTML;
+    btn.innerHTML = '🚀 Opening...';
+
+    // 3. Show Toast Instruction with selected mode label
+    showToast('Copied to Clipboard!', `Opening Medium editor (${content.label}). Press Ctrl + V to paste.`, '✨');
+
+    // 4. Open Medium Story Editor in new tab
+    setTimeout(() => {
+      window.open('https://medium.com/new-story', '_blank');
+      btn.innerHTML = '✅ Copied & Opened!';
+      setTimeout(() => { btn.innerHTML = orig; }, 3500);
+    }, 300);
+  }
+
+  // Open LinkedIn Post Creation & Auto-Copy Clean Text
+  async function openLinkedInPost(btn) {
+    const rawText = document.getElementById('li-raw') ? document.getElementById('li-raw').value : '';
+    const cleanText = stripMarkdown(rawText);
+
+    try {
+      await navigator.clipboard.writeText(cleanText);
+    } catch (err) {
+      await navigator.clipboard.writeText(rawText);
+    }
+
+    const orig = btn.innerHTML;
+    btn.innerHTML = '🚀 Opening...';
+
+    showToast('LinkedIn Post Copied!', 'Opening LinkedIn feed. Press Ctrl + V (or Cmd + V) to paste.', '💼');
+
+    setTimeout(() => {
+      window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
+      btn.innerHTML = '✅ Copied & Opened!';
+      setTimeout(() => { btn.innerHTML = orig; }, 3500);
+    }, 300);
+  }
+
+  // Smart Medium blog copy (clean formatted / rich text with no raw asterisks)
+  async function copyMediumBlog(btn, mode) {
+    const rawText = document.getElementById('medium-raw').value;
+    const content = getSelectedOrVisibleContent();
+
+    if (mode === 'raw') {
+      await navigator.clipboard.writeText(rawText);
+    } else {
+      try {
+        if (navigator.clipboard && window.ClipboardItem && content.html) {
+          const htmlBlob = new Blob([content.html], { type: 'text/html' });
+          const textBlob = new Blob([content.text], { type: 'text/plain' });
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'text/html': htmlBlob,
+              'text/plain': textBlob
+            })
+          ]);
+        } else {
+          await navigator.clipboard.writeText(content.text);
+        }
+      } catch (err) {
+        await navigator.clipboard.writeText(content.text);
+      }
+    }
+
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  }
+
+  // Copy text from an element and strip out any raw markdown symbols
+  async function copyCleanElement(elId, btn) {
+    const el = document.getElementById(elId);
+    const rawText = el ? (el.value || el.innerText || el.textContent) : '';
+    const cleanText = stripMarkdown(rawText);
+
+    try {
+      await navigator.clipboard.writeText(cleanText);
+    } catch (e) {
+      await navigator.clipboard.writeText(rawText);
+    }
+
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  }
+
+  // Render markdown for blog and reel panels
+  function renderMarkdown() {
+    if (typeof marked === 'undefined') return;
+
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+    });
+
+    const mediumRaw = document.getElementById('medium-raw') ? document.getElementById('medium-raw').value : '';
+    if (mediumRaw && mediumRaw.trim()) {
+      document.getElementById('medium-rendered').innerHTML = marked.parse(mediumRaw);
+    }
+
+    const reelRaw = document.getElementById('reel-raw') ? document.getElementById('reel-raw').value : '';
+    if (reelRaw && reelRaw.trim()) {
+      const reelEl = document.getElementById('reel-rendered');
+      if (reelEl) reelEl.innerHTML = marked.parse(reelRaw);
+    }
+
+    if (typeof hljs !== 'undefined') {
+      document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    }
+  }
+
+  function updateCharCount() {
+    const text = document.getElementById('li-raw').value || '';
+    document.getElementById('li-char-count').textContent = text.length;
+  }
+
+  // Set Visual Display Mode (Images vs Prompts vs Both)
+  function setImageDisplayMode(mode, btn) {
+    const blogEl = document.getElementById('medium-rendered');
+    if (!blogEl) return;
+
+    // Update active button state
+    document.querySelectorAll('#image-view-slider .slider-option').forEach(b => b.classList.remove('active'));
+    if (btn) {
+      btn.classList.add('active');
+    } else {
+      const target = document.querySelector(`#image-view-slider .slider-option[data-mode="${mode}"]`);
+      if (target) target.classList.add('active');
+    }
+
+    // Update blog container classes
+    blogEl.classList.remove('mode-images', 'mode-prompts', 'mode-both');
+    blogEl.classList.add('mode-' + mode);
+
+    // Persist choice
+    localStorage.setItem('medium_image_view_mode', mode);
+  }
+
+  // Medium Claps Interaction
+  function toggleClap(btn) {
+    const countEl = btn.querySelector('.clap-count');
+    btn.classList.toggle('clapped');
+    if (btn.classList.contains('clapped')) {
+      if (countEl) countEl.textContent = '1.4K+';
+    } else {
+      if (countEl) countEl.textContent = '1.4K';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    renderMarkdown();
+    updateCharCount();
+    const savedMode = localStorage.getItem('medium_image_view_mode') || 'images';
+    setImageDisplayMode(savedMode);
+  });
+</script>
+{% endblock %}

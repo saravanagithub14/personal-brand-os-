@@ -150,3 +150,8 @@ CELERY_TIMEZONE = TIME_ZONE
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
+
+# AI API Keys
+OPENAI_API_KEY = env("OPENAI_API_KEY", default="")
+GOOGLE_API_KEY = env("GOOGLE_API_KEY", default="")
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")

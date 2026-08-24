@@ -50,9 +50,10 @@
                 <li><a href="{% url 'projects:list' %}">🚀 Projects Hub</a></li>
                 <li><a href="{% url 'research:list' %}">📚 Knowledge Base</a></li>
                 <li><a href="{% url 'ai_agents:chat' %}">🤖 AI Studio & Copilot</a></li>
+                <li><a href="{% url 'ai_agents:campaign_list' %}">⚡ Multi-Agent Campaign Suite</a></li>
             </ul>
         </aside>
-        {% endif %}
+{% endif %}
 
         <main class="main-content">
             {% block content %}
