@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.http import url_has_allowed_host_and_scheme
 from .models import SocialAccount
 from .services import SocialStatsFetcher
 
@@ -149,13 +150,20 @@ class UpdateLastPostDateView(LoginRequiredMixin, View):
             except Exception:
                 pass
 
-        if target_cadence_days and int(target_cadence_days) > 0:
-            account.target_cadence_days = int(target_cadence_days)
+        if target_cadence_days:
+            try:
+                cadence = int(target_cadence_days)
+                if cadence > 0:
+                    account.target_cadence_days = cadence
+            except (TypeError, ValueError):
+                pass
 
         account.save()
 
-        next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "dashboard:index"
-        if next_url.startswith("/"):
+        next_url = request.POST.get("next") or request.META.get("HTTP_REFERER")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
             return redirect(next_url)
         return redirect("dashboard:index")
 

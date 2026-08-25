@@ -994,12 +994,15 @@ Write the complete Medium blog post in Markdown format now:"""
             max_tokens=3800,
         )
 
-        if llm_result and len(llm_result.strip()) > 300:
+        # Reject short completions. A Medium draft needs enough substance to
+        # meet the requested 800-1200 word range, not merely a valid heading.
+        if llm_result and len(llm_result.strip()) >= 4_000:
             blog_content = llm_result.strip()
         else:
             logger.warning(f"MediumBlogWriterAgent: LLM empty for '{topic}', using structured fallback.")
             blog_content = (
-                f"# {topic}: Practical Methods, Architecture Variants, and Production Realities\n\n"
+                f"# Definitive Deep-Dive: {topic}\n\n"
+                f"## Practical Methods, Architecture Variants, and Production Realities\n\n"
                 f"> 🖼️ **Image Prompt — System Architecture Overview**: *Professional clean isometric 3D infographic explaining the end-to-end {topic} pipeline, modern editorial consulting presentation style, soft light cream background, dark navy typography, vibrant orange accent highlights, 4 connected modular stages from left to right linked by metallic conduits with rounded callout cards underneath, 16:9 wide landscape, clean geometric shapes with soft shadows.*\n\n"
                 f"When implementing {topic}, teams often get bogged down in hype rather than architecture. "
                 f"Here is a clear look at how it works, where it breaks, and what actually works in production.\n\n"
@@ -1018,6 +1021,23 @@ Write the complete Medium blog post in Markdown format now:"""
                 f"- Validate on real representative data early.\n"
                 f"- Define strict schemas before building abstractions.\n"
                 f"- Keep human oversight in the loop for high-leverage steps.\n\n"
+                f"## Implementation Playbook\n\n"
+                f"Start by defining the decision that {topic} is expected to improve, then write down the input, output, "
+                f"owner, and measurable failure condition for every step. Run the simplest useful version against a small, "
+                f"representative workload before introducing autonomous branching or a larger toolchain. This keeps the team "
+                f"from confusing a polished demo with a dependable production system.\n\n"
+                f"Next, instrument the workflow. Capture latency, error types, quality-review outcomes, and the cost of each "
+                f"successful result. Those signals reveal whether the bottleneck is retrieval, orchestration, data quality, or "
+                f"human handoff. They also make trade-offs explicit: a slower route may be justified for high-risk work, while a "
+                f"fast deterministic route is usually the better default for routine tasks.\n\n"
+                f"Finally, introduce safeguards incrementally. Validate structured outputs, keep external actions behind an "
+                f"approval boundary, and retain enough context to reproduce a bad result. A system that can explain why it made "
+                f"a recommendation is easier to improve than one that only produces a confident answer. These practices turn "
+                f"{topic} from a one-off experiment into an operating capability.\n\n"
+                f"## Questions to Take Into Your Next Review\n\n"
+                f"- Which input assumptions would invalidate the result?\n"
+                f"- Where does a human need to approve, correct, or stop the flow?\n"
+                f"- What metric proves the new approach is better than the current process?\n\n"
                 f"> 🖼️ **Image Prompt — Production Impact & Deployment Matrix**: *Clean isometric 3D infographic roadmap for {topic}, showcasing the 4 progressive deployment phases with a bottom horizontal IMPACT panel containing 4 consequence cards with orange icons, editorial corporate aesthetic, 16:9 aspect ratio.*"
             )
 
@@ -1153,6 +1173,7 @@ Write a highly technical Malayalam engineering Reel script with AT LEAST 5 TOP-P
             logger.warning(f"InstagramReelAgent: LLM empty for '{topic}', using fallback.")
             topic_tag = topic.replace(" ", "")[:20]
             script_text = (
+                f"# INSTAGRAM REEL SCRIPT: {topic}\n\n"
                 f"**TOP 5 VIRAL HOOKS (Choose One for Your Recording):**\n"
                 f"1. 🎯 **Curiosity / Mechanism**: 'LLM inference-ൽ ഏറ്റവും വലിയ bottleneck compute അല്ല, memory bandwidth ആണ് എന്ന് അറിയാമോ?'\n"
                 f"2. ⚡ **Contradiction / Myth-Buster**: 'കൂടുതൽ GPU compute power വാങ്ങിയിട്ടും നിങ്ങളുടെ LLM latency കുറയാത്തത് എന്തുകൊണ്ടാണെന്ന് അറിയാമോ?'\n"
@@ -1249,7 +1270,8 @@ Write the full LinkedIn post now:"""
             max_tokens=800,
         )
 
-        if llm_result and len(llm_result.strip()) > 100:
+        # 180 words is the lower bound specified by the prompt.
+        if llm_result and len(llm_result.split()) >= 180:
             post_text = llm_result.strip()
         else:
             logger.warning(f"LinkedInPostAgent: LLM empty for '{topic}', using fallback.")
@@ -1258,9 +1280,15 @@ Write the full LinkedIn post now:"""
                 f"Most conversations around {topic} focus on tool selection rather than architectural foundations.\n\n"
                 f"When building systems in production, success rarely comes from switching to a larger model or adding more libraries. "
                 f"It comes down to structured data flows, strict validation schemas, and predictable state management.\n\n"
+                f"The practical question is not whether the technology can produce an impressive first result. It is whether "
+                f"your team can inspect its assumptions, measure its failure modes, and improve it after real users encounter it. "
+                f"That is the difference between an experiment and a system people can trust.\n\n"
                 f"I put together a complete breakdown covering practical methods, architecture variants, and failure modes:\n\n"
                 f"📝 Full Medium Article: {m_link}\n"
-                f"🎬 60-Second Bilingual Summary (Malayalam + English): {i_link}\n\n"
+                f"🎬 Instagram Reel, 60-Second Bilingual Summary (Malayalam + English): {i_link}\n\n"
+                f"If you are building in this area, start with one narrow workflow, define the evaluation before the interface, "
+                f"and keep a human review step wherever an incorrect outcome has a real cost. The smallest reliable system is a "
+                f"better foundation than a broad, unmeasured automation.\n\n"
                 f"How are you approaching {topic} in your current projects? What architectural choices made the biggest difference?\n\n"
                 f"#{topic_tag} #SoftwareEngineering #TechArchitecture #BuildInPublic #PersonalBrand"
             )
@@ -1292,6 +1320,16 @@ class TopicResearchCampaignOrchestrator:
         user = campaign.user
         topic = campaign.topic
 
+        # Step 0: preserve the research and fact-check source for every draft.
+        campaign.status = "RESEARCHING"
+        campaign.save(update_fields=["status", "updated_at"])
+        research_notes = DeepResearchAgent.conduct_research(
+            topic=topic, research_depth=campaign.research_depth, user=user
+        )
+        campaign.research_notes = f"# Deep Research & Fact-Check Summary\n\n{research_notes}"
+        campaign.fact_check_summary = research_notes
+        campaign.save(update_fields=["research_notes", "fact_check_summary", "updated_at"])
+
         # Step 1: Medium Blog Article
         campaign.status = "GENERATING_MEDIUM"
         campaign.save()
@@ -1300,13 +1338,12 @@ class TopicResearchCampaignOrchestrator:
         campaign.medium_blog = medium_blog
         campaign.save()
 
-        # Create draft ContentItem for Medium
-        ContentItem.objects.create(
+        # Make retries idempotent instead of creating duplicate drafts.
+        ContentItem.objects.update_or_create(
             user=user,
             platform="MEDIUM",
             title=f"{topic}: The Complete Guide",
-            body=medium_blog,
-            status="DRAFT",
+            defaults={"body": medium_blog, "status": "DRAFT"},
         )
 
         # Step 2: Instagram Reel Script (Bilingual: Malayalam + English)
@@ -1323,12 +1360,11 @@ class TopicResearchCampaignOrchestrator:
         campaign.save()
 
         # Create draft ContentItem for Instagram
-        ContentItem.objects.create(
+        ContentItem.objects.update_or_create(
             user=user,
             platform="INSTAGRAM",
             title=f"[Reel Script] {topic}",
-            body=f"{reel_script}\n\n=== CAPTION ===\n{reel_caption}",
-            status="DRAFT",
+            defaults={"body": f"{reel_script}\n\n=== CAPTION ===\n{reel_caption}", "status": "DRAFT"},
         )
 
         # Step 3: LinkedIn Post (Cross-Promoting Medium + Reel)
@@ -1348,12 +1384,11 @@ class TopicResearchCampaignOrchestrator:
         campaign.linkedin_post = linkedin_post
 
         # Create draft ContentItem for LinkedIn
-        ContentItem.objects.create(
+        ContentItem.objects.update_or_create(
             user=user,
             platform="LINKEDIN",
             title=f"[LinkedIn Post] {topic} (Medium + Reel Cross-Post)",
-            body=linkedin_post,
-            status="DRAFT",
+            defaults={"body": linkedin_post, "status": "DRAFT"},
         )
 
         campaign.status = "COMPLETED"
@@ -1578,7 +1613,3 @@ class MediumBlogImageGeneratorService:
         ).update(body=blog_text)
 
         return generated_count
-
-
-
-

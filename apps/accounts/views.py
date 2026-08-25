@@ -2,6 +2,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import render, redirect
 from django.views import View
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
 from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -27,11 +29,8 @@ class LoginView(View):
         return render(request, "accounts/login.html", {"form": form})
 
 
+@method_decorator(require_POST, name="dispatch")
 class LogoutView(View):
-    def get(self, request):
-        logout(request)
-        return redirect("accounts:login")
-
     def post(self, request):
         logout(request)
         return redirect("accounts:login")

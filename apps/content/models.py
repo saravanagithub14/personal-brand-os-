@@ -36,12 +36,15 @@ class ContentItem(models.Model):
     PLATFORM_CHOICES = [
         ("LINKEDIN", "LinkedIn"),
         ("X", "X (Twitter)"),
+        ("X_TWITTER", "X / Twitter"),
         ("X_THREAD", "X Thread"),
         ("YOUTUBE", "YouTube Video"),
         ("YOUTUBE_SHORT", "YouTube Short"),
         ("INSTAGRAM_REEL", "Instagram Reel"),
+        ("INSTAGRAM", "Instagram"),
         ("CAROUSEL", "Carousel"),
         ("BLOG", "Blog Article"),
+        ("MEDIUM", "Medium"),
         ("NEWSLETTER", "Newsletter"),
         ("REDDIT", "Reddit"),
         ("FACEBOOK", "Facebook"),
@@ -82,6 +85,7 @@ class ContentItem(models.Model):
     caption = models.TextField(blank=True, default="")
     visual_instructions = models.TextField(blank=True, default="")
     thumbnail_idea = models.TextField(blank=True, default="")
+    review_feedback = models.TextField(blank=True, default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

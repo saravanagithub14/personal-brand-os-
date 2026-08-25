@@ -122,10 +122,10 @@ class SocialStatsFetcher:
         engagement = round(min(15.0, 3.5 + (followers * 0.02) + (total_stars * 0.1)), 1)
 
         return {
-            "followers": followers if followers > 0 else 4,
-            "posts": public_repos if public_repos > 0 else 10,
-            "impressions": estimated_impressions if estimated_impressions > 0 else 1850,
-            "engagement": engagement if engagement > 0.0 else 4.2,
+            "followers": followers,
+            "posts": public_repos,
+            "impressions": estimated_impressions,
+            "engagement": engagement if (followers or public_repos or total_stars) else 0.0,
             "stars": total_stars,
             "citations": 0,
         }
@@ -175,58 +175,23 @@ class SocialStatsFetcher:
             except Exception:
                 pass
 
-        return {
-            "followers": 1250,
-            "posts": 35,
-            "impressions": 18500,
-            "engagement": 5.2,
-            "stars": 0,
-            "citations": 0,
-        }
+        return {"followers": 0, "posts": 0, "impressions": 0, "engagement": 0.0, "stars": 0, "citations": 0}
 
     @classmethod
     def fetch_researchgate_stats(cls, handle):
-        return {
-            "followers": 320,
-            "posts": 14,
-            "impressions": 8400,
-            "engagement": 8.4,
-            "stars": 0,
-            "citations": 180,
-        }
+        return {"followers": 0, "posts": 0, "impressions": 0, "engagement": 0.0, "stars": 0, "citations": 0}
 
     @classmethod
     def fetch_medium_stats(cls, handle):
-        return {
-            "followers": 450,
-            "posts": 18,
-            "impressions": 6200,
-            "engagement": 4.5,
-            "stars": 650,
-            "citations": 0,
-        }
+        return {"followers": 0, "posts": 0, "impressions": 0, "engagement": 0.0, "stars": 0, "citations": 0}
 
     @classmethod
     def fetch_orcid_stats(cls, handle):
-        return {
-            "followers": 180,
-            "posts": 14,
-            "impressions": 3100,
-            "engagement": 7.2,
-            "stars": 0,
-            "citations": 42,
-        }
+        return {"followers": 0, "posts": 0, "impressions": 0, "engagement": 0.0, "stars": 0, "citations": 0}
 
     @classmethod
     def fetch_facebook_stats(cls, handle):
-        return {
-            "followers": 650,
-            "posts": 22,
-            "impressions": 5800,
-            "engagement": 4.6,
-            "stars": 0,
-            "citations": 0,
-        }
+        return {"followers": 0, "posts": 0, "impressions": 0, "engagement": 0.0, "stars": 0, "citations": 0}
 
     @classmethod
     def fetch_public_web_stats(cls, platform, handle):
@@ -245,7 +210,7 @@ class SocialStatsFetcher:
         elif platform == "FACEBOOK":
             return cls.fetch_facebook_stats(clean_name)
 
-        return {"followers": 850, "posts": 12, "impressions": 4500, "engagement": 4.0, "stars": 0, "citations": 0}
+        return {"followers": 0, "posts": 0, "impressions": 0, "engagement": 0.0, "stars": 0, "citations": 0}
 
     @classmethod
     def fetch_stats(cls, platform, handle):
@@ -309,10 +274,15 @@ class SocialStatsFetcher:
         """Fetch stats & last post date for the account, update models, and create a snapshot."""
         fetched = cls.fetch_stats(account.platform, account.handle)
         
-        account.followers_count = fetched["followers"] if fetched.get("followers", 0) > 0 else (account.followers_count or 100)
-        account.total_impressions = fetched["impressions"] if fetched.get("impressions", 0) > 0 else (account.total_impressions or 1000)
-        account.posts_count = fetched["posts"] if fetched.get("posts", 0) > 0 else (account.posts_count or 10)
-        account.engagement_rate = fetched["engagement"] if fetched.get("engagement", 0.0) > 0.0 else (account.engagement_rate or 4.0)
+        # Preserve the last verified values if a provider returns no data.
+        if fetched.get("followers", 0) > 0:
+            account.followers_count = fetched["followers"]
+        if fetched.get("impressions", 0) > 0:
+            account.total_impressions = fetched["impressions"]
+        if fetched.get("posts", 0) > 0:
+            account.posts_count = fetched["posts"]
+        if fetched.get("engagement", 0.0) > 0.0:
+            account.engagement_rate = fetched["engagement"]
         account.stars_count = fetched.get("stars", 0)
         account.citations_count = fetched.get("citations", 0)
 

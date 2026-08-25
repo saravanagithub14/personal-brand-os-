@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from .fields import EncryptedTextField
 
 
 class SocialAccount(models.Model):
@@ -34,8 +35,8 @@ class SocialAccount(models.Model):
     active = models.BooleanField(default=True)
     # OAuth 2.0 Credentials & Storage
     provider_user_id = models.CharField(max_length=255, blank=True, null=True)
-    access_token = models.TextField(blank=True, default="")
-    refresh_token = models.TextField(blank=True, default="")
+    access_token = EncryptedTextField(blank=True, default="")
+    refresh_token = EncryptedTextField(blank=True, default="")
     token_expires_at = models.DateTimeField(blank=True, null=True)
     scopes = models.JSONField(default=list, blank=True)
     metadata = models.JSONField(default=dict, blank=True)

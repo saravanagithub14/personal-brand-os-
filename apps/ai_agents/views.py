@@ -2,8 +2,27 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.db import transaction
+import logging
 from apps.content.models import ContentItem
 from .services import ContentRepurposer, BrandVoiceReviewer, IdeaGeneratorAgent
+
+logger = logging.getLogger(__name__)
+
+
+def _enqueue_campaign(campaign_id):
+    """Queue campaign work without turning a broker outage into a 500 page."""
+    from .models import TopicResearchCampaign
+    from .tasks import run_topic_research_campaign
+
+    try:
+        run_topic_research_campaign.delay(campaign_id)
+    except Exception:
+        logger.exception("Unable to queue campaign %s", campaign_id)
+        TopicResearchCampaign.objects.filter(id=campaign_id, status="QUEUED").update(
+            status="FAILED",
+            error_message="Campaign queue is unavailable. Start Redis and the Celery worker, then retry.",
+        )
 
 
 class RepurposeContentView(LoginRequiredMixin, View):
@@ -136,11 +155,12 @@ class TopicCampaignCreateView(LoginRequiredMixin, View):
         campaign = TopicResearchCampaign.objects.create(
             user=request.user,
             topic=topic,
-            status="PENDING",
+            status="QUEUED",
         )
 
-        # Trigger campaign orchestrator
-        TopicResearchCampaignOrchestrator.run_campaign(campaign.id)
+        # The pipeline performs AI and network work; queue it only after the
+        # campaign record is committed so web requests remain fast and retryable.
+        transaction.on_commit(lambda: _enqueue_campaign(campaign.id))
 
         return redirect("ai_agents:campaign_detail", campaign_id=campaign.id)
 

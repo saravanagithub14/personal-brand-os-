@@ -47,6 +47,7 @@ class AgentExecutionLog(models.Model):
 class TopicResearchCampaign(models.Model):
     STATUS_CHOICES = [
         ("PENDING", "Pending"),
+        ("QUEUED", "Queued"),
         ("RESEARCHING", "Researching & Fact Checking"),
         ("GENERATING_MEDIUM", "Drafting Medium Article"),
         ("GENERATING_REEL", "Writing Instagram Reel Script"),
@@ -77,4 +78,3 @@ class TopicResearchCampaign(models.Model):
 
     def __str__(self):
         return f"Campaign: {self.topic} ({self.status})"
-

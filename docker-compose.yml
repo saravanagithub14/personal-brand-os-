@@ -35,8 +35,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-personal-brand-os-dev-key
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in your environment or .env file}
       - DATABASE_URL=postgres://postgres:postgrespassword@db:5432/personal_brand_os
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -53,8 +53,8 @@ services:
     volumes:
       - .:/app
     environment:
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-personal-brand-os-dev-key
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in your environment or .env file}
       - DATABASE_URL=postgres://postgres:postgrespassword@db:5432/personal_brand_os
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -70,8 +70,8 @@ services:
     volumes:
       - .:/app
     environment:
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-personal-brand-os-dev-key
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in your environment or .env file}
       - DATABASE_URL=postgres://postgres:postgrespassword@db:5432/personal_brand_os
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0

@@ -30,7 +30,7 @@ class ContentEditorView(LoginRequiredMixin, View):
             "title": request.POST.get("title", "Untitled Content"),
             "idea": request.POST.get("idea", ""),
             "platform": request.POST.get("platform", "LINKEDIN"),
-            "content_type": request.POST.get("platform", "LINKEDIN"),
+            "content_type": request.POST.get("content_type") or request.POST.get("platform", "LINKEDIN"),
             "status": request.POST.get("status", "DRAFT"),
             "priority": request.POST.get("priority", "MEDIUM"),
             "hook": request.POST.get("hook", ""),
@@ -78,11 +78,16 @@ class PillarsListView(LoginRequiredMixin, View):
         description = request.POST.get("description")
         allocation = request.POST.get("allocation_percentage", 25)
         if name:
+            try:
+                allocation = int(allocation)
+            except (TypeError, ValueError):
+                allocation = 25
+            allocation = max(0, min(100, allocation))
             ContentPillar.objects.create(
                 user=request.user,
                 name=name,
                 description=description,
-                allocation_percentage=int(allocation)
+                allocation_percentage=allocation
             )
         return redirect("content:pillars")
 

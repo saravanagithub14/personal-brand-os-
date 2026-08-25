@@ -42,12 +42,8 @@ class LinkedInOAuthService:
 
     @classmethod
     def get_redirect_uri(cls, request=None):
-        if request:
-            try:
-                from django.urls import reverse
-                return request.build_absolute_uri(reverse("auth_linkedin_callback"))
-            except Exception:
-                pass
+        # Do not derive an OAuth callback from the request Host header. The
+        # provider callback must be an explicitly registered, trusted URL.
         return getattr(settings, "LINKEDIN_REDIRECT_URI", "") or os.getenv(
             "LINKEDIN_REDIRECT_URI", "http://localhost:8000/auth/linkedin/callback/"
         )

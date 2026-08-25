@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -15,7 +16,7 @@ urlpatterns = [
     path("auth/linkedin/callback/", LinkedInOAuthCallbackView.as_view(), name="auth_linkedin_callback"),
     path("portfolio/", PublicPortfolioView.as_view(), name="public_portfolio"),
     path("portfolio/<str:username>/", PublicPortfolioView.as_view(), name="public_portfolio_user"),
-    path("", include("apps.dashboard.urls")),
+    path("", RedirectView.as_view(pattern_name="ai_agents:campaign_list", permanent=False), name="home"),
     path("content/", include("apps.content.urls")),
     path("agents/", include("apps.ai_agents.urls")),
     path("research/", include("apps.research.urls")),

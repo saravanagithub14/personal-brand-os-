@@ -28,7 +28,10 @@
             </button>
             {% if user.is_authenticated %}
                 <span>Logged in as <strong>{{ user.username }}</strong></span>
-                <a href="{% url 'accounts:logout' %}">Logout</a>
+                <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="link-button">Logout</button>
+                </form>
             {% else %}
                 <a href="{% url 'accounts:login' %}">Login</a>
                 <a href="{% url 'accounts:register' %}" class="btn">Register</a>
@@ -40,16 +43,6 @@
         {% if user.is_authenticated %}
         <aside class="sidebar">
             <ul class="sidebar-menu">
-                <li><a href="{% url 'dashboard:index' %}">📊 Dashboard</a></li>
-                <li><a href="{% url 'public_portfolio' %}" target="_blank">🌐 Public Portfolio</a></li>
-                <li><a href="{% url 'brand:profile' %}">👤 Brand Strategy</a></li>
-                <li><a href="{% url 'content:list' %}">📝 Content Bank</a></li>
-                <li><a href="{% url 'content:ideas' %}">💡 Ideas Bank</a></li>
-                <li><a href="{% url 'content:pillars' %}">🎯 Content Pillars</a></li>
-                <li><a href="{% url 'calendar:index' %}">📅 Calendar</a></li>
-                <li><a href="{% url 'projects:list' %}">🚀 Projects Hub</a></li>
-                <li><a href="{% url 'research:list' %}">📚 Knowledge Base</a></li>
-                <li><a href="{% url 'ai_agents:chat' %}">🤖 AI Studio & Copilot</a></li>
                 <li><a href="{% url 'ai_agents:campaign_list' %}">⚡ Multi-Agent Campaign Suite</a></li>
             </ul>
         </aside>
@@ -62,7 +55,7 @@
     </div>
 
     <!-- Persistent Floating AI Brand Assistant Chatbot Widget -->
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and show_campaign_copilot %}
     <div id="floatingChatContainer" style="position: fixed; bottom: 25px; right: 25px; z-index: 9999;">
         <!-- Chat Trigger Button -->
         <button id="floatingChatToggleBtn" class="btn" style="border-radius: 30px; padding: 0.6rem 1.2rem; font-size: 1rem; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 0.5rem;">

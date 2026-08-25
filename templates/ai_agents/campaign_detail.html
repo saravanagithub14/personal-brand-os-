@@ -1024,6 +1024,8 @@
               <div class="medium-story-meta-row">
                 <span>6 min read</span>
                 <span>·</span>
+                <span id="medium-word-count">0 words</span>
+                <span>·</span>
                 <span>{{ campaign.created_at|date:"M d, Y" }}</span>
               </div>
             </div>
@@ -1417,6 +1419,7 @@
     });
 
     const mediumRaw = document.getElementById('medium-raw') ? document.getElementById('medium-raw').value : '';
+    updateMediumWordCount(mediumRaw);
     if (mediumRaw && mediumRaw.trim()) {
       document.getElementById('medium-rendered').innerHTML = marked.parse(mediumRaw);
     }
@@ -1435,6 +1438,13 @@
   function updateCharCount() {
     const text = document.getElementById('li-raw').value || '';
     document.getElementById('li-char-count').textContent = text.length;
+  }
+
+  function updateMediumWordCount(text) {
+    const countEl = document.getElementById('medium-word-count');
+    if (!countEl) return;
+    const words = (text || '').trim().match(/\S+/g) || [];
+    countEl.textContent = `${words.length.toLocaleString()} ${words.length === 1 ? 'word' : 'words'}`;
   }
 
   // Set Visual Display Mode (Images vs Prompts vs Both)
@@ -1597,6 +1607,7 @@
     const mediumEl = document.getElementById('medium-rendered');
     if (mediumEl) {
       mediumEl.addEventListener('input', function() {
+        updateMediumWordCount(this.innerText);
         if (document.getElementById('medium-raw')) {
           document.getElementById('medium-raw').value = this.innerText;
         }

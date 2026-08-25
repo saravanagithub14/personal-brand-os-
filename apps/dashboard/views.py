@@ -32,62 +32,11 @@ class DashboardView(LoginRequiredMixin, View):
 
         recent_items = content_qs.order_by("-updated_at")[:5]
         profile, _ = BrandProfile.objects.get_or_create(user=user)
-        if not profile.name:
-            profile.name = "Saravana Perumal R."
-        if not profile.professional_title:
-            profile.professional_title = "Biologist turned Gen AI Engineer & Mentor"
-        profile.save()
 
         projects = Project.objects.filter(user=user).order_by("-updated_at")
         published_items = content_qs.filter(status="PUBLISHED").order_by("-published_at", "-updated_at")
 
-        # Social Accounts & Analytics - Ensure all core accounts exist for user
-        default_handles = [
-            ("GITHUB", "@saravanagithub14", "https://github.com/saravanagithub14"),
-            ("LINKEDIN", "Saravana Perumal R.", "https://linkedin.com/in/saravana-perumal-r-04b368288"),
-            ("MEDIUM", "@mynamesaravanaperumal", "https://medium.com/@mynamesaravanaperumal"),
-            ("ORCID", "0000-0002-6492-1103", "https://orcid.org/0000-0002-6492-1103"),
-            ("RESEARCHGATE", "Saravana_Perumal_R", "https://www.researchgate.net/profile/Saravana_Perumal_R"),
-            ("FACEBOOK", "Saravana Perumal R.", "https://www.facebook.com/profile.php?id=61589884478018"),
-            ("INSTAGRAM", "@cellstocode", "https://instagram.com/cellstocode"),
-        ]
-        from apps.social.services import SocialStatsFetcher
-        for plat, hnd, url in default_handles:
-            acc, created = SocialAccount.objects.get_or_create(user=user, platform=plat)
-            if created or not acc.handle or acc.handle == "@cellstocode":
-                acc.handle = hnd
-                acc.profile_url = url
-                acc.save()
-                SocialStatsFetcher.sync_social_account(acc)
-
         social_accounts = SocialAccount.objects.filter(user=user, active=True)
-        from django.utils import timezone
-        from datetime import timedelta
-
-        # Pre-seed last_post_at timestamps for default consistency targets
-        cadence_map = {
-            "INSTAGRAM": (2, timedelta(days=1)),
-            "LINKEDIN": (3, timedelta(days=2)),
-            "GITHUB": (7, timedelta(days=3)),
-            "MEDIUM": (14, timedelta(days=5)),
-            "RESEARCHGATE": (30, timedelta(days=12)),
-            "ORCID": (30, timedelta(days=18)),
-            "FACEBOOK": (3, timedelta(days=2)),
-        }
-
-        for acc in social_accounts:
-            if acc.platform in cadence_map:
-                target_days, default_delta = cadence_map[acc.platform]
-                if not acc.last_post_at:
-                    acc.last_post_at = timezone.now() - default_delta
-                    acc.save()
-
-        # Check published content items to sync latest published post date
-        for acc in social_accounts:
-            latest_item = ContentItem.objects.filter(user=user, platform=acc.platform, status="PUBLISHED").order_by("-published_at", "-updated_at").first()
-            if latest_item and (latest_item.published_at or latest_item.updated_at):
-                acc.last_post_at = latest_item.published_at or latest_item.updated_at
-                acc.save()
 
         total_followers = social_accounts.aggregate(Sum("followers_count"))["followers_count__sum"] or 0
         total_impressions = social_accounts.aggregate(Sum("total_impressions"))["total_impressions__sum"] or 0
@@ -163,17 +112,17 @@ class DashboardView(LoginRequiredMixin, View):
                 account.handle = handle
                 if profile_url:
                     account.profile_url = profile_url
-                if followers_count and int(followers_count) > 0:
-                    account.followers_count = int(followers_count)
-                if total_impressions and int(total_impressions) > 0:
-                    account.total_impressions = int(total_impressions)
-                if engagement_rate and float(engagement_rate) > 0.0:
-                    account.engagement_rate = float(engagement_rate)
+                try:
+                    if int(followers_count) >= 0:
+                        account.followers_count = int(followers_count)
+                    if int(total_impressions) >= 0:
+                        account.total_impressions = int(total_impressions)
+                    if float(engagement_rate) >= 0:
+                        account.engagement_rate = float(engagement_rate)
+                except (TypeError, ValueError):
+                    # Leave existing values unchanged when optional inputs are invalid.
+                    pass
                 account.save()
-
-                # Automatically fetch live stats for the handle ID!
-                from apps.social.services import SocialStatsFetcher
-                SocialStatsFetcher.sync_social_account(account)
 
         return redirect("dashboard:index")
 
