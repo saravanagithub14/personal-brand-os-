@@ -13,7 +13,7 @@ sys.path.insert(0, str(BASE_DIR))
 env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, ""),
-    ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
+    ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1", ".onrender.com"]),
     CSRF_TRUSTED_ORIGINS=(list, []),
     DATABASE_URL=(str, f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
     REDIS_URL=(str, "redis://localhost:6379/0"),
