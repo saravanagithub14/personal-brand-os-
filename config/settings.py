@@ -7,13 +7,14 @@ from django.core.exceptions import ImproperlyConfigured
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Add apps directory to sys.path
-sys.path.insert(0, str(BASE_DIR / "apps"))
+# Make the project package importable when Django starts under Gunicorn.
+sys.path.insert(0, str(BASE_DIR))
 
 env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, ""),
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
+    CSRF_TRUSTED_ORIGINS=(list, []),
     DATABASE_URL=(str, f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
     REDIS_URL=(str, "redis://localhost:6379/0"),
 )
@@ -26,6 +27,7 @@ if env_file.exists():
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS")
 
 if not SECRET_KEY:
     raise ImproperlyConfigured("SECRET_KEY must be set in the environment.")
